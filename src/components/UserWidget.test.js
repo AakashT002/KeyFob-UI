@@ -14,17 +14,21 @@ describe('Component: UserWidget', () => {
     },
   ];
   const roles = [];
-  const wrapper = shallow(<UserWidget user={user} roles={roles}
-    validateUserForm={spy} confirmUserDelete={spy} />);
+  const wrapper = shallow(
+    <UserWidget
+      user={user}
+      roles={roles}
+      validateUserForm={spy}
+      confirmUserDelete={spy}
+    />
+  );
 
   it('renders a proper userwidget css class', () => {
     expect(wrapper.find('.section__user').exists()).toBe(true);
   });
 
   it('should call delete user function the remove button is clicked', () => {
-    const submitButton = wrapper.find(
-      '.UserWidget__remove'
-    );
+    const submitButton = wrapper.find('.UserWidget__remove');
     submitButton.simulate('click');
     expect(spy).toHaveBeenCalled();
   });

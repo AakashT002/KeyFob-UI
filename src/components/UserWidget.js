@@ -64,7 +64,12 @@ const UserWidget = ({
   const roleChecklist = () => {
     return roles.map((role, i) => {
       return (
-        <Checkbox name={role.name} id={i} label={role.name} value={role.id} key={i}
+        <Checkbox
+          name={role.name}
+          id={i}
+          label={role.name}
+          value={role.id}
+          key={i}
           onChange={value =>
             handleRoleChange('ischecked', value, role.name, index, i)}
           checked={ischecked}
@@ -131,9 +136,7 @@ const UserWidget = ({
             className="UserWidget__save"
             label="SAVE"
             onClick={() => saveUser()}
-            disabled={
-              !validateUserForm(index) || isUserSaved !== false
-            }
+            disabled={!validateUserForm(index) || isUserSaved !== false}
           />
           <Button
             className="UserWidget__remove"

@@ -33,7 +33,7 @@ export const addBlankUser = realm => ({
         enabled: true,
         credentials: [
           {
-            temporary: true,            
+            temporary: true,
             type: 'password',
             value: 'password',
           },

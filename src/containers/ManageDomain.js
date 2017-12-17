@@ -415,7 +415,7 @@ export class ManageDomain extends Component {
                         this.setState({ previewIndex: -1 });
                       }}
                       handleDomainPreviewPrevious={
-                        this.handleDomainPreviewPreviou
+                        this.handleDomainPreviewPrevious
                       }
                       handleDomainPreviewNext={this.handleDomainPreviewNext}
                       previewIndex={previewIndex}

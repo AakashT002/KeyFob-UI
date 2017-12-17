@@ -1,0 +1,69 @@
+@import './variables';
+
+.TeamForm {
+  padding-top: 40px;
+  width: 686px;
+  margin-left: 15px;
+  background-color: $grey-white;
+  padding-bottom: 20px;
+
+  .TeamForm__team-name {
+    width: 500px;
+  }
+
+  .TeamForm__select {
+    margin-left: 14px;
+    margin-top: -3px;
+  }
+
+  .TeamForm__forms-section {
+	  background-color: $white;
+  }
+
+  .TeamForm__team-section {
+    height: 135px;
+  }
+
+  .TeamForm__team--detail {
+    margin-top: -40px;
+    margin-bottom: 70px;
+  }
+
+  .TeamForm__bottom-section {
+    margin-top: -70px;
+    margin-bottom: 40px;
+    margin-left: 470px;
+  }
+
+  .TeamForm__save { 
+	  display: inline;
+    color: $light-pink;
+    font-weight: bold;
+
+      &:disabled {
+      color: $grey-text;
+     } 
+  }
+
+  .TeamForm__remove { 
+	  display: inline;
+    color: $light-pink;
+    font-weight: bold
+  }
+
+  .TeamForm__message {
+    margin-top: -69px;
+	  margin-left: -192px !important;
+  }
+
+  #TeamForm_div {
+	  .md-text-field {
+		  color: $black;
+		  font-size: 1.5em;
+		}
+			
+		.md-divider {
+			background-color: $black  ;
+		} 
+  }
+} 

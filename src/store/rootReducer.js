@@ -1,25 +1,24 @@
 import { routerReducer } from 'react-router-redux';
 import { combineReducers } from 'redux';
 import { loginReducer } from 'react-redux-modules/lib/reducers/loginReducer';
-import count from './count/reducer';
-import items from './items/reducer';
-import user from './user/reducer';
+
 import addUser from './addUser/reducer';
-import domain from './domain/reducer';
-import users from './users/reducer';
 import client from './client/reducer';
+import domain from './domain/reducer';
 import role from './roles/reducer';
+import team from './team/reducer';
+import user from './user/reducer';
+import users from './users/reducer';
 
 const root = combineReducers({
   router: routerReducer,
-  count,
-  items,
+  addUser,
+  client,
+  domain,
+  role,
+  team,
   user,
   users,
-  addUser,
-  domain,
-  client,
-  role,
   ...loginReducer('loginForm'),
 });
 

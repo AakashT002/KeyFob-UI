@@ -11,7 +11,7 @@ const DomainPreview = ({
   handleDomainPreviewClose,
   handleDomainPreviewPrevious,
   handleDomainPreviewNext,
-  tabIndexInPreview
+  tabIndexInPreview,
 }) => {
   return (
     <div className="DomainPreview DomainPreview--featured">
@@ -19,12 +19,13 @@ const DomainPreview = ({
         <h2 className="DomainPreview__header">{domainPreview.header}</h2>
         <i
           className="material-icons DomainPreview__button-close"
-          onClick={handleDomainPreviewClose}>
+          onClick={handleDomainPreviewClose}
+        >
           &#xE14C;
         </i>
         <ul className="DomainPreview__content">
-          {domainPreview.content.map((row) => {
-            return (<li key={row.id}>{row.value}</li>);
+          {domainPreview.content.map(row => {
+            return <li key={row.id}>{row.value}</li>;
           })}
         </ul>
         <div className="DomainPreview__footer">
@@ -35,18 +36,34 @@ const DomainPreview = ({
             key="back"
             className="DomainPreview__button-prev"
             onClick={
-              handleDomainPreviewPrevious && 
-              handleDomainPreviewPrevious.bind(this, index)}
+              handleDomainPreviewPrevious &&
+              handleDomainPreviewPrevious.bind(this, index)
+            }
           >
             Back
           </Button>
           <div className="DomainPreview__dots">
-            <div className={tabIndexInPreview === 0 ? 'DomainPreview__dot selected' :
-              'DomainPreview__dot'}></div>
-            <div className={tabIndexInPreview === 1 ? 'DomainPreview__dot selected' :
-              'DomainPreview__dot'}></div>
-            <div className={tabIndexInPreview === 2 ? 'DomainPreview__dot selected' :
-              'DomainPreview__dot'}></div>
+            <div
+              className={
+                tabIndexInPreview === 0
+                  ? 'DomainPreview__dot selected'
+                  : 'DomainPreview__dot'
+              }
+            />
+            <div
+              className={
+                tabIndexInPreview === 1
+                  ? 'DomainPreview__dot selected'
+                  : 'DomainPreview__dot'
+              }
+            />
+            <div
+              className={
+                tabIndexInPreview === 2
+                  ? 'DomainPreview__dot selected'
+                  : 'DomainPreview__dot'
+              }
+            />
           </div>
           <Button
             flat
@@ -54,8 +71,9 @@ const DomainPreview = ({
             key="next"
             className="DomainPreview__button-next"
             onClick={
-              handleDomainPreviewNext && 
-              handleDomainPreviewNext.bind(this, index)}
+              handleDomainPreviewNext &&
+              handleDomainPreviewNext.bind(this, index)
+            }
           >
             Next
           </Button>

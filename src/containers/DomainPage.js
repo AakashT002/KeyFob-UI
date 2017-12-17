@@ -19,6 +19,7 @@ import {
 } from '../store/addUser/action';
 
 import ClientForm from '../components/ClientForm';
+import TeamForm from '../components/TeamForm';
 import UserWidget from '../components/UserWidget';
 import {
   loadClients,
@@ -28,12 +29,15 @@ import {
   handleClientDeletion,
   stopClientSpinner,
 } from '../store/client/action';
+import { loadTeams } from '../store/team/action';
+
 import {
   loadRoles,
   saveRole,
   handleRoleDeletion,
   stopRoleSpinner,
 } from '../store/roles/action';
+
 import {
   CURRENT_DOMAIN_NAME,
   IGNORED_CLIENTS,
@@ -51,10 +55,12 @@ class DomainPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      currentdomainName: sessionStorage.getItem(CURRENT_DOMAIN_NAME),
       activeTab: this.props.activeTab || 0,
       clients: [],
       roles: [],
       users: [],
+      teams: [],
       checkIcon: false,
       focusOnNewElement: false,
       deleteObj: {
@@ -74,11 +80,13 @@ class DomainPage extends Component {
     this.handleDelete = this.handleDelete.bind(this);
   }
 
+  getMaxTabs() {
+    return this.state.currentdomainName === 'master' ? 2 : 3;
+  }
+
   componentWillMount() {
     const { dispatch } = this.props;
-    const currentdomainName = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
-
-    dispatch(fetchUsers(currentdomainName)).then(() => {
+    dispatch(fetchUsers(this.state.currentdomainName)).then(() => {
       let existingUsers = [];
       const { users } = this.props;
       users.forEach(user => {
@@ -103,18 +111,14 @@ class DomainPage extends Component {
       this.setState({ users: existingUsers });
     });
 
-    dispatch(loadClients(currentdomainName)).then(() => {
+    dispatch(loadClients(this.state.currentdomainName)).then(() => {
       let clients = [];
       const { clientList } = this.props;
 
       clientList.forEach(client => {
-        if (
-          !IGNORED_CLIENTS.includes(
-            client.clientId ? client.clientId.toString() : ''
-          )
-        ) {
-          if (currentdomainName === 'master') {
-            if (
+        if (!IGNORED_CLIENTS.includes(client.clientId.toString())) {
+          if (this.state.currentdomainName === 'master') {
+           if (
               client.clientId.substr(client.clientId.length - 6, 6) !== '-realm'
             ) {
               let clientObj = {
@@ -163,7 +167,7 @@ class DomainPage extends Component {
       dispatch(stopClientSpinner());
     });
 
-    dispatch(loadRoles(currentdomainName)).then(() => {
+    dispatch(loadRoles(this.state.currentdomainName)).then(() => {
       let { roleList } = this.props;
       let roles = [];
       for (var j = 0; j < roleList.length; j++) {
@@ -177,6 +181,19 @@ class DomainPage extends Component {
       }
       this.setState({ roles });
       dispatch(stopRoleSpinner());
+    });
+
+    dispatch(loadTeams(this.state.currentdomainName)).then(() => {
+      let { teamList } = this.props;
+      let teams = [];
+      for (var j = 0; j < teamList.length; j++) {
+        let teamObj = {
+          id: teamList[j].id,
+          name: teamList[j].name,
+        };
+        teams = teams.concat([teamObj]);
+      }
+      this.setState({ teams });
     });
   }
 
@@ -193,8 +210,9 @@ class DomainPage extends Component {
       this.setState({ focusOnNewElement: false });
     }
 
-    if (this.roleElement && activeTab === 1) {
+    if (this.roleElement && activeTab === 1 && focusOnNewElement) {
       this.roleElement.focus();
+      this.setState({ focusOnNewElement: false });
     }
   }
 
@@ -211,10 +229,21 @@ class DomainPage extends Component {
     this.setState({ activeTab: index });
   }
 
+  isMasterDomain() {
+    return this.state.currentdomainName === 'master' ? true : false;
+  }
+
   handlePlusClick() {
     const { clients, roles, activeTab } = this.state;
     this.setState({ focusOnNewElement: true });
-    if (activeTab === 0) {
+    const isClientsTab = !this.isMasterDomain() && activeTab === 0;
+    const isTeamsTab = this.isMasterDomain() && activeTab === 0;
+    const isRolesTab = !this.isMasterDomain() && activeTab === 1;
+    const isUsersTab =
+      (!this.isMasterDomain() && activeTab === 2) ||
+      (this.isMasterDomain() && activeTab === 1);
+
+    if (isClientsTab) {
       if (
         this.state.clients.length === 0 ||
         this.state.clients[0].id !== undefined
@@ -243,7 +272,7 @@ class DomainPage extends Component {
           this.setState({ clients });
         });
       }
-    } else if (activeTab === 1) {
+    } else if (isRolesTab) {
       let role = {
         id: '',
         name: '',
@@ -258,11 +287,14 @@ class DomainPage extends Component {
         roles.splice(0, 0, role);
         this.setState({ roles });
       }
-    } else if (activeTab === 2) {
-      const realm = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
-      this.props.dispatch(addBlankUser(realm)).then(() => {
-        this.setState({ users: this.props.users });
-      });
+    } else if (isUsersTab) {
+      this.props
+        .dispatch(addBlankUser(this.state.currentdomainName))
+        .then(() => {
+          this.setState({ users: this.props.users });
+        });
+    } else if (isTeamsTab) {
+      this.setState({ teams: [] }); // TODO : Pending...
     }
   }
 
@@ -362,22 +394,23 @@ class DomainPage extends Component {
   }
 
   onRoleSave(index) {
-    const currentdomainName = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
     const { roles } = this.state;
     if (roles[index].name !== '') {
       var roleObject = {
         name: this.state.roles[index].name,
       };
     }
-    this.props.dispatch(saveRole(roleObject, currentdomainName)).then(() => {
-      if (this.props.saving === true) {
-        roles[index].id = this.props.roleId;
-      }
-      roles[index].isDirty = false;
-      roles[index].disableButton = this.props.saving;
-      this.setState({ roles });
-      this.setState({ checkIcon: true });
-    });
+    this.props
+      .dispatch(saveRole(roleObject, this.state.currentdomainName))
+      .then(() => {
+        if (this.props.saving === true) {
+          roles[index].id = this.props.roleId;
+        }
+        roles[index].isDirty = false;
+        roles[index].disableButton = this.props.saving;
+        this.setState({ roles });
+        this.setState({ checkIcon: true });
+      });
   }
 
   handleDelete(index, id) {
@@ -422,7 +455,7 @@ class DomainPage extends Component {
     const index = deleteObj.selectedIndex;
     const id = deleteObj.selectedId;
 
-    const currentdomainName = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
+    const currentdomainName = this.state.currentdomainName;
     if (activeTab === 0) {
       if (id !== '') {
         this.props
@@ -469,6 +502,157 @@ class DomainPage extends Component {
     this.setState({
       deleteObj: newObj,
     });
+  }
+
+  renderTeamsTab() {
+    const { teams } = this.state;
+    return (
+      <Tab label="TEAMS" className="DomainPage__roles-tab">
+        {teams.length > 0 ?
+         (teams.map((team, i) => <TeamForm
+           key={i} 
+           index={i} 
+           team={team} 
+         />)) :         
+           (
+          <div className="DomainPage__teams--no-data">No Teams Added Yet</div>
+        )}
+      </Tab>
+    );
+  }
+
+  renderClientsTab() {
+    const { clients } = this.state;
+    const { loadingClients } = this.props;
+    return (
+      <Tab label="CLIENTS" className="DomainPage__clients-tab">
+        {loadingClients ? (
+          <span className="DomainPage__spinner-span">
+            <SyncLoader color={'#BC477B'} loading={true} />
+          </span>
+        ) : clients.length !== 0 ? (
+          clients.map((client, i) => (
+            <ClientForm
+              key={i}
+              index={i}
+              client={client}
+              handleFieldChange={(name, value) =>
+                this.handleFieldChange(name, value, i)
+              }
+              handleSave={this.onClientSave.bind(this)}
+              validateClientForm={this.validateClientForm.bind(this)}
+              isClientSaved={this.state.clients[i].isClientSaved}
+              showAsSaved={this.state.clients[i].showAsSaved}
+              isError={this.props.isError}
+              feedbackMessage={this.props.feedbackMessage}
+              inputRef={el => (this.clientElement = el)}
+              confirmClientDelete={this.confirmClientDelete}
+            />
+          ))
+        ) : (
+          <div className="DomainPage__clients-msg">No Clients Added Yet</div>
+        )}
+      </Tab>
+    );
+  }
+
+  renderRolesTab() {
+    const { roles } = this.state;
+    const { loadingRoles } = this.props;
+
+    return (
+      <Tab label="ROLES" className="DomainPage__roles-tab">
+        {loadingRoles ? (
+          <span className="DomainPage__spinner-span">
+            <SyncLoader color={'#BC477B'} loading={true} />
+          </span>
+        ) : roles.length > 0 ? (
+          roles.map((role, i) => (
+            <Roles
+              key={role.id}
+              index={i}
+              roleId={role.id}
+              roleName={role.name}
+              renderFeedbackMessage={this.renderFeedbackMessage}
+              disableButton={role.disableButton}
+              isDirty={role.isDirty}
+              handleChange={this.handleChange}
+              onRoleSave={this.onRoleSave}
+              focusOnText={this.focusOnText}
+              blurOnText={this.blurOnText}
+              inputRef={el => (this.roleElement = el)}
+              confirmRoleDelete={this.confirmRoleDelete}
+            />
+          ))
+        ) : (
+          <div>
+            <h1 className="DomainPage__roles--no-data">No Roles Added Yet</h1>
+          </div>
+        )}
+      </Tab>
+    );
+  }
+
+  renderUsersTab() {
+    const { users } = this.state;
+    return (
+      <Tab label="USERS" className="DomainPage__users-tab">
+        {users.length !== 0 ? (
+          users.map((user, i) => (
+            <UserWidget
+              key={i}
+              index={i}
+              user={user}
+              handleUserFieldChange={(name, value) =>
+                this.handleUserFieldChange(name, value, i)
+              }
+              removeUser={i => this.removeUser(i)}
+              validateUserForm={this.validateUserForm.bind(this)}
+              saveUser={() => this.onUserSave(i)}
+              roles={this.state.roles}
+              isUserSaved={this.state.users[i].isUserSaved}
+              showAsSaved={this.state.users[i].showAsSaved}
+              isErrorForUser={this.props.isErrorForUser}
+              UserFeedbackMessage={this.props.UserFeedbackMessage}
+              handleRoleChange={(value, value_one, value_two, value_three, i) =>
+                this.handleRoleChange(
+                  value,
+                  value_one,
+                  value_two,
+                  value_three,
+                  i
+                )
+              }
+              confirmUserDelete={this.confirmUserDelete}
+              inputRef={el => (this.userElement = el)}
+              ischecked={this.state.ischecked}
+              counter={this.state.counter}
+            />
+          ))
+        ) : (
+          <div className="DomainPage__users-msg">No Users Added Yet</div>
+        )}
+      </Tab>
+    );
+  }
+
+  renderApplicationTabs() {
+    return (
+      <Tabs tabId="domain-tab" className="DomainPage__tabs">
+        {this.renderClientsTab()}
+        {this.renderRolesTab()}
+        {this.renderUsersTab()}
+      </Tabs>
+    );
+  }
+
+  renderMasterDomainTabs() {
+    return (
+      <Tabs tabId="domain-tab" className="DomainPage__tabs">
+        {this.renderTeamsTab()}
+        {this.renderUsersTab()}
+      </Tabs>
+    );
   }
 
   determineModalMessage(activeTab) {
@@ -570,15 +754,20 @@ class DomainPage extends Component {
   }
 
   render() {
-    const { activeTab, clients, roles, users } = this.state;
-    const { loadingClients, loadingRoles } = this.props;
-    const currentdomainName = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
+    const { activeTab } = this.state;
     let modalMessage = this.determineModalMessage(activeTab);
     let titleMessage = this.determineTitle(activeTab);
+    let applicableTabs = null;
+    if (this.state.currentdomainName === 'master') {
+      applicableTabs = this.renderMasterDomainTabs();
+    } else {
+      applicableTabs = this.renderApplicationTabs();
+    }
     return (
       <div className="DomainPage">
         <h1 className="DomainPage__domain-name">
-          {currentdomainName !== null && currentdomainName}
+          {this.state.currentdomainName !== null &&
+            this.state.currentdomainName}
         </h1>
         <Card className="card-centered">
           <TabsContainer
@@ -586,111 +775,7 @@ class DomainPage extends Component {
             activeTabIndex={activeTab}
             onTabChange={this.handleTabChange}
           >
-            <Tabs tabId="domain-tab" className="DomainPage__tabs">
-              <Tab label="CLIENTS" className="DomainPage__clients-tab">
-                {loadingClients ? (
-                  <span className="DomainPage__spinner-span">
-                    <SyncLoader color={'#BC477B'} loading={true} />
-                  </span>
-                ) : clients.length !== 0 ? (
-                  clients.map((client, i) => (
-                    <ClientForm
-                      key={i}
-                      index={i}
-                      client={client}
-                      handleFieldChange={(name, value) =>
-                        this.handleFieldChange(name, value, i)}
-                      handleSave={this.onClientSave.bind(this)}
-                      validateClientForm={this.validateClientForm.bind(this)}
-                      isClientSaved={this.state.clients[i].isClientSaved}
-                      showAsSaved={this.state.clients[i].showAsSaved}
-                      isError={this.props.isError}
-                      feedbackMessage={this.props.feedbackMessage}
-                      inputRef={el => (this.clientElement = el)}
-                      confirmClientDelete={this.handleDelete}
-                    />
-                  ))
-                ) : (
-                  <div className="DomainPage__clients-msg">
-                    No Clients Added Yet
-                  </div>
-                )}
-              </Tab>
-              <Tab label="ROLES" className="DomainPage__roles-tab">
-                {loadingRoles ? (
-                  <span className="DomainPage__spinner-span">
-                    <SyncLoader color={'#BC477B'} loading={true} />
-                  </span>
-                ) : roles.length > 0 ? (
-                  roles.map((role, i) => (
-                    <Roles
-                      key={role.id}
-                      index={i}
-                      roleId={role.id}
-                      roleName={role.name}
-                      renderFeedbackMessage={this.renderFeedbackMessage}
-                      disableButton={role.disableButton}
-                      isDirty={role.isDirty}
-                      handleChange={this.handleChange}
-                      onRoleSave={this.onRoleSave}
-                      focusOnText={this.focusOnText}
-                      blurOnText={this.blurOnText}
-                      inputRef={el => (this.roleElement = el)}
-                      confirmRoleDelete={this.handleDelete}
-                    />
-                  ))
-                ) : (
-                  <div>
-                    <h1 className="DomainPage__roles--no-data">
-                      No Roles Added Yet
-                    </h1>
-                  </div>
-                )}
-              </Tab>
-              <Tab label="USERS" className="DomainPage__users-tab">
-                {users.length !== 0 ? (
-                  users.map((user, i) => (
-                    <UserWidget
-                      key={i}
-                      index={i}
-                      user={user}
-                      handleUserFieldChange={(name, value) =>
-                        this.handleUserFieldChange(name, value, i)}
-                      removeUser={i => this.removeUser(i)}
-                      validateUserForm={this.validateUserForm.bind(this)}
-                      saveUser={() => this.onUserSave(i)}
-                      roles={this.state.roles}
-                      isUserSaved={this.state.users[i].isUserSaved}
-                      showAsSaved={this.state.users[i].showAsSaved}
-                      isErrorForUser={this.props.isErrorForUser}
-                      UserFeedbackMessage={this.props.UserFeedbackMessage}
-                      handleRoleChange={(
-                        value,
-                        value_one,
-                        value_two,
-                        value_three,
-                        i
-                      ) =>
-                        this.handleRoleChange(
-                          value,
-                          value_one,
-                          value_two,
-                          value_three,
-                          i
-                        )}
-                      confirmUserDelete={this.handleDelete}
-                      inputRef={el => (this.userElement = el)}
-                      ischecked={this.state.ischecked}
-                      counter={this.state.counter}
-                    />
-                  ))
-                ) : (
-                  <div className="DomainPage__users-msg">
-                    No Users Added Yet
-                  </div>
-                )}
-              </Tab>
-            </Tabs>
+            {applicableTabs}
           </TabsContainer>
           <div className="DomainPage__navigate">
             <hr className="DomainPage__line" />
@@ -706,7 +791,7 @@ class DomainPage extends Component {
             </Button>
             <Button
               flat
-              disabled={activeTab === 2}
+              disabled={activeTab === this.getMaxTabs() - 1}
               key="next"
               label="Next"
               iconBefore={false}
@@ -788,6 +873,7 @@ DomainPage.propTypes = {
   loading: PropTypes.bool,
   clientList: PropTypes.array,
   roleList: PropTypes.array,
+  teamList: PropTypes.array,
   isClientSaved: PropTypes.bool,
   isError: PropTypes.bool,
   feedbackMessage: PropTypes.string,
@@ -809,6 +895,7 @@ function mapStateToProps(state) {
     clientList: state.client.clientList,
     loadingRoles: state.role.requesting,
     roleList: state.role.roleList,
+    teamList: state.team.teamList,
     isClientSaved: state.client.isClientSaved,
     isError: state.client.isError,
     feedbackMessage: state.client.feedbackMessage,
