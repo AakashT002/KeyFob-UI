@@ -16,6 +16,21 @@ export const saveDomain = domainObject => ({
   },
 });
 
+export const updateDomain = (oldDomainName, newDomainObject) => ({
+  types: [
+    ActionTypes.EDIT_DOMAIN_REQUEST,
+    ActionTypes.EDIT_DOMAIN_SUCCESS,
+    ActionTypes.EDIT_DOMAIN_FAILURE,
+  ],
+  callAPI: async () => {
+    try {
+      return await Domains.updateDomain(oldDomainName, newDomainObject);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+});
+
 export const validateDomain = domainName => ({
   types: [
     ActionTypes.VALIDATE_DOMAIN_REQUEST,
@@ -102,7 +117,7 @@ export function setDomainName(domainName) {
   return { type: ActionTypes.SET_DOMAINNAME, domainName };
 }
 
-export const handleRealmDeletion = (i, realmName) => ({
+export const handleRealmDeletion = realmName => ({
   types: [
     ActionTypes.DELETE_REALM_REQUEST,
     ActionTypes.DELETE_REALM_SUCCESS,
@@ -110,7 +125,7 @@ export const handleRealmDeletion = (i, realmName) => ({
   ],
   callAPI: async () => {
     try {
-      return await Domains.deleteRealm(i, realmName);
+      return await Domains.deleteRealm(realmName);
     } catch (error) {
       throw new Error(error.message);
     }

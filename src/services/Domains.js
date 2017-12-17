@@ -18,9 +18,13 @@ class Domains {
     if (response.ok) {
       const data = await response.json();
 
-      data.map(realmName => {
+      data.map(realm => {
         return result.push({
-          realm: realmName.realm,
+          id: realm.id,
+          realm: realm.realm,
+          clients: [],
+          roles: [],
+          users: [],
         });
       });
 
@@ -79,11 +83,12 @@ class Domains {
       const res = Object.assign([], list);
       res.map(item => {
         if (item.realm === realm) {
-          let clients = clientsData.filter((client) => {
-            return !IGNORED_CLIENTS.includes(client.clientId.toString()) ?
-              (item.realm === 'master' ?
-                (client.clientId.substr(-6) !== '-realm' ?
-                  true : false) : true) : false;
+          let clients = clientsData.filter(client => {
+            return !IGNORED_CLIENTS.includes(client.clientId.toString())
+              ? item.realm === 'master'
+                ? client.clientId.substr(-6) !== '-realm' ? true : false
+                : true
+              : false;
           });
 
           item.clients = clients;
@@ -142,6 +147,37 @@ class Domains {
       }
     );
 
+    if (response.status === 201) {
+      return response;
+    } else if (response.status === 409) {
+      throw new Error('Realm already exists.');
+    } else {
+      throw new Error('Unable to save - Retry after sometime.');
+    }
+
+    /*
+    if (response.ok) {
+      return response;
+    } else {
+      throw new Error('Domain could not be created.');
+    }
+    */
+  }
+
+  static async updateDomain(oldDomainName, newDomainObject) {
+    const token = sessionStorage.kctoken;
+    const response = await fetch(
+      `${process.env.REACT_APP_AUTH_URL}/admin/realms/${oldDomainName}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newDomainObject),
+      }
+    );
+
     if (response.ok) {
       return response;
     } else {
@@ -168,7 +204,7 @@ class Domains {
     }
   }
 
-  static async deleteRealm(i, realmName) {
+  static async deleteRealm(realmName) {
     const token = sessionStorage.kctoken;
     const response = await fetch(
       `${process.env.REACT_APP_AUTH_URL}/admin/realms/${realmName}`,

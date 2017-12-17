@@ -4,14 +4,21 @@
   height: 90px;
 
   .Domain__domain-info {
-	position: relative;
-	right: 120px; 
-	bottom: 40%;
-	width: 275px;
-  margin-left: 100px;
+    position: relative;
+    right: 120px; 
+    bottom: 40%;
+    width: 250px;
+    margin-left: 100px;
 
 	  .md-text--disabled {
       color: $black;
+    }
+
+    .md-text-field {
+      &::placeholder {
+        color: $grey-text;
+        font-family: Roboto;
+      }
     }
   }
 
@@ -49,40 +56,33 @@
     top: 18px;
     }
 
-    .Domain__buttons--all {
+    .Domain__buttons {
       cursor: pointer;
       padding-left: 8px;
     }
 
-    .Domain__button--save {
-      visibility: hidden;
+    .Domain__button-save {
       position: relative;
-      right: 90px;
+      right: 75px;
+
+      &.hide {
+        visibility: hidden;
+      }
     }
 
-    .Domain__button--edit {
+    .Domain__button-edit {
       position: relative;
-      right: 70px;
+      right: 55px;
     }
 
-    .Domain__button--info {
+    .Domain__button-info {
       position: relative;
-      right: 50px;
+      right: 35px;
     }
 
-    .Domain__button--trash {
+    .Domain__button-trash {
       position: relative;
-      right: 30px;
-      bottom: 2px;
-
-        &.not-clickable {
-          cursor: auto;
-    
-          &:hover {
-            background-color: transparent;
-            opacity: 0.5;
-          }
-        }
+      right: 15px;
     }
 
     .Domain__divider {
@@ -92,4 +92,12 @@
       z-index: -1;
     }
 
+    .not-clickable {
+      cursor: default;
+
+      &:hover {
+        background-color: transparent;
+        opacity: 1;
+      }
+    }
 }

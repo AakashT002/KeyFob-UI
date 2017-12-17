@@ -7,10 +7,10 @@ const initialDomainsState = {
   requesting: false,
   domainName: '',
   loading: false,
-  responseHeaderArray: [],
+  isError: false,
+  errorMessage: '',
 };
 
-let newState;
 export const domain = createReducer(initialDomainsState, {
   [ActionTypes.VALIDATE_DOMAIN_REQUEST](state) {
     return { ...state, requesting: true };
@@ -65,18 +65,33 @@ export const domain = createReducer(initialDomainsState, {
   [ActionTypes.VALIDATE_CLIENT](state, action) {
     return { ...state, requesting: false, clientValid: action.isClientValid };
   },
-  [ActionTypes.CREATE_DOMAIN_REQUEST](state, action) {
-    newState = Object.assign({}, state);
-    newState.responseHeaderArray.push(action.response);
-    newState.responseHeader = action.response;
-    newState.requesting = false;
-    return newState;
+  [ActionTypes.CREATE_DOMAIN_REQUEST](state) {
+    return { ...state, requesting: true, isError: false };
   },
   [ActionTypes.CREATE_DOMAIN_SUCCESS](state) {
-    return { ...state, loading: false };
+    return { ...state, requesting: false, isError: false };
   },
-  [ActionTypes.CREATE_DOMAIN_FAILURE](state) {
-    return { ...state, loading: false };
+  [ActionTypes.CREATE_DOMAIN_FAILURE](state, action) {
+    return {
+      ...state,
+      requesting: false,
+      isError: true,
+      errorMessage: action.error.message,
+    };
+  },
+  [ActionTypes.EDIT_DOMAIN_REQUEST](state) {
+    return { ...state, requesting: true };
+  },
+  [ActionTypes.EDIT_DOMAIN_SUCCESS](state) {
+    return { ...state, requesting: false };
+  },
+  [ActionTypes.EDIT_DOMAIN_FAILURE](state, action) {
+    return {
+      ...state,
+      requesting: false,
+      isError: true,
+      errorMessage: action.error.message,
+    };
   },
   [ActionTypes.DELETE_REALM_REQUEST](state) {
     return { ...state, loading: true };

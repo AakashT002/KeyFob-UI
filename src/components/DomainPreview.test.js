@@ -6,7 +6,7 @@ import DomainPreview from './DomainPreview';
 describe('Component: DomainPreview', () => {
   const domainPreview = {
     header: 'Clients',
-    content: ['master']
+    content: [{id: 1, value: 'master'}]
   };
   const wrapper = shallow(<DomainPreview domainPreview={domainPreview} />);
 

@@ -8,15 +8,19 @@ import DomainPreview from '../components/DomainPreview';
 
 import '../assets/stylesheets/Domain.css';
 import '../assets/stylesheets/DomainPreview.css';
-import saveIcon from '../assets/images/Save.png';
+import checkIcon from '../assets/images/checkmark20x20.png';
 import editONIcon from '../assets/images/Edit_ON.png';
+import editOFFIcon from '../assets/images/Edit_OFF.png';
 import infoONIcon from '../assets/images/Info_ON.png';
+import infoOFFIcon from '../assets/images/Info_OFF.png';
+import saveIcon from '../assets/images/Save.png';
 import trashIcon from '../assets/images/TrashCan.png';
 
 const Domain = ({
   clients,
   confirmDelete,
   domainPreview,
+  //errorMessage,
   handleChange,
   handleDomainPreviewClose,
   handleDomainPreviewNext,
@@ -24,32 +28,45 @@ const Domain = ({
   handleIconClick,
   handlePreviewClick,
   index,
+  inputRef,
+  //isError,
   previewIndex,
   realm,
   roles,
+  handleOnSave,
   tabIndexInPreview,
-  users
+  users,
 }) => {
   return (
     <div className="Domain">
       <TableRow>
         <TableColumn>
           <Avatar
-            key={realm}
+            key={realm.id}
             suffix="pink"
-            onClick={handleIconClick && handleIconClick.bind(this, realm)}
+            onClick={
+              realm.id && realm.id.length > 0
+                ? handleIconClick.bind(this, realm.realm)
+                : null
+            }
           >
-            {realm && realm.length > 0 ? realm.charAt(0).toUpperCase() : '?'}
+            {realm.realm && realm.realm.length > 0
+              ? realm.realm.charAt(0).toUpperCase()
+              : '?'}
           </Avatar>
         </TableColumn>
-        <TableColumn className="Domain__domain-info-col">
+        <TableColumn>
           <TextField
-            className="Domain__domain-info"
-            disabled={realm && realm.length > 0}
-            id={`id ${realm}`}
-            label={realm}
+            className="md-cell md-cell--bottom Domain__domain-info"
+            disabled={
+              realm.id && realm.id.length > 0 && realm.realm === 'master'
+            }
+            id={realm.id}
+            value={realm.realm}
             customSize="title"
-            onChange={() => handleChange()}
+            placeholder={'Your Domain'}
+            ref={index === 0 && realm.id !== undefined ? inputRef : null}
+            onChange={value => handleChange(index, value)}
             helpText={
               (clients ? clients.length : 0) +
               ' clients \u2022 ' +
@@ -63,39 +80,63 @@ const Domain = ({
         <TableColumn>
           <div className="Domain__domain-buttons1-col">
             <img
-              src={saveIcon}
+              src={realm.isSaved ? checkIcon : saveIcon}
               alt="Save"
-              className="Domain__buttons--all Domain__button--save"
+              className={
+                !realm.isSaved && !realm.isDirty
+                  ? 'Domain__buttons Domain__button-save hide'
+                  : 'Domain__buttons Domain__button-save'
+              }
+              onClick={handleOnSave.bind(this, index, realm)}
             />
             <img
-              src={editONIcon}
+              src={realm.id && realm.id.length > 0 ? editONIcon : editOFFIcon}
               alt="Edit"
-              className="Domain__buttons--all Domain__button--edit"
+              className={
+                realm.id && realm.id.length > 0
+                  ? 'Domain__buttons Domain__button-edit'
+                  : 'Domain__buttons Domain__button-edit not-clickable'
+              }
+              onClick={
+                realm.id && realm.id.length > 0
+                  ? handleIconClick.bind(this, realm.realm)
+                  : null
+              }
             />
             <img
-              src={infoONIcon}
+              src={realm.id && realm.id.length > 0 ? infoONIcon : infoOFFIcon}
               alt="Preview"
-              className="Domain__buttons--all Domain__button--info"
-              onClick={handlePreviewClick.bind(this, index)}
+              className={
+                realm.id && realm.id.length > 0
+                  ? 'Domain__buttons Domain__button-info'
+                  : 'Domain__buttons Domain__button-info not-clickable'
+              }
+              onClick={
+                realm.id && realm.id.length > 0
+                  ? handlePreviewClick.bind(this, index)
+                  : null
+              }
             />
             <img
               src={trashIcon}
               alt="Delete"
               className={
-                realm === 'master'
-                  ? 'Domain__buttons--all Domain__button--trash not-clickable'
-                  : 'Domain__buttons--all Domain__button--trash'
+                realm.realm === 'master'
+                  ? 'Domain__buttons Domain__button-trash not-clickable'
+                  : 'Domain__buttons Domain__button-trash'
               }
               onClick={
-                confirmDelete && realm !== 'master'
-                  ? confirmDelete.bind(this, index, realm)
+                confirmDelete &&
+                (realm.realm !== 'master' ||
+                  (realm.realm === 'master' && realm.id === ''))
+                  ? confirmDelete.bind(this, index)
                   : null
               }
             />
           </div>
         </TableColumn>
       </TableRow>
-      {index === previewIndex &&
+      {index === previewIndex && (
         <DomainPreview
           index={index}
           domainPreview={domainPreview}
@@ -103,7 +144,8 @@ const Domain = ({
           handleDomainPreviewPrevious={handleDomainPreviewPrevious}
           handleDomainPreviewNext={handleDomainPreviewNext}
           tabIndexInPreview={tabIndexInPreview}
-        />}
+        />
+      )}
       <hr className="Domain__divider" />
     </div>
   );
@@ -119,9 +161,11 @@ Domain.propTypes = {
   handleDomainPreviewPrevious: PropTypes.func,
   handleIconClick: PropTypes.func,
   handlePreviewClick: PropTypes.func,
+  handleOnSave: PropTypes.func,
   index: PropTypes.number,
+  inputRef: PropTypes.func,
   previewIndex: PropTypes.number,
-  realm: PropTypes.string,
+  realm: PropTypes.object,
   roles: PropTypes.array,
   tabIndexInPreview: PropTypes.number,
   users: PropTypes.array,

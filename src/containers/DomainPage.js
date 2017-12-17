@@ -71,9 +71,7 @@ class DomainPage extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.onRoleSave = this.onRoleSave.bind(this);
     this.renderFeedbackMessage = this.renderFeedbackMessage.bind(this);
-    this.confirmRoleDelete = this.confirmRoleDelete.bind(this);
-    this.confirmClientDelete = this.confirmClientDelete.bind(this);
-    this.confirmUserDelete = this.confirmUserDelete.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
   }
 
   componentWillMount() {
@@ -110,7 +108,11 @@ class DomainPage extends Component {
       const { clientList } = this.props;
 
       clientList.forEach(client => {
-        if (!IGNORED_CLIENTS.includes(client.clientId.toString())) {
+        if (
+          !IGNORED_CLIENTS.includes(
+            client.clientId ? client.clientId.toString() : ''
+          )
+        ) {
           if (currentdomainName === 'master') {
             if (
               client.clientId.substr(client.clientId.length - 6, 6) !== '-realm'
@@ -328,7 +330,7 @@ class DomainPage extends Component {
   }
 
   validatePresence(value) {
-    return value.toString().length > 0;
+    return value && value.toString().length > 0;
   }
 
   renderFeedbackMessage(index) {
@@ -378,34 +380,21 @@ class DomainPage extends Component {
     });
   }
 
-  confirmRoleDelete(index, roleid) {
-    const newRoleObj = this.state.deleteObj;
-    newRoleObj.selectedId = roleid;
-    newRoleObj.selectedIndex = index;
-    newRoleObj.deleteModalVisible = true;
-    this.setState({
-      deleteObj: newRoleObj,
-    });
-  }
-
-  confirmClientDelete(index, clientId) {
+  handleDelete(index, id) {
     const newObj = this.state.deleteObj;
-    newObj.selectedId = clientId;
+    newObj.selectedId = id;
     newObj.selectedIndex = index;
-    newObj.deleteModalVisible = true;
+    if (id !== undefined && id !== '') {
+      newObj.deleteModalVisible = true;
+    } else {
+      newObj.deleteModalVisible = false;
+    }
     this.setState({
       deleteObj: newObj,
     });
-  }
-
-  confirmUserDelete(index, userId) {
-    const newUserObj = this.state.deleteObj;
-    newUserObj.selectedId = userId;
-    newUserObj.selectedIndex = index;
-    newUserObj.deleteModalVisible = true;
-    this.setState({
-      deleteObj: newUserObj,
-    });
+    if (id === undefined || id === '') {
+      this.remove(this.state.activeTab, this.state.deleteObj);
+    }
   }
 
   _removeClient(index) {
@@ -534,8 +523,7 @@ class DomainPage extends Component {
           users: existingUsers,
         };
       });
-    }
-    else {
+    } else {
       this.setState(() => {
         let existingUsers = this.state.users;
         let newUser = existingUsers[index];
@@ -578,9 +566,7 @@ class DomainPage extends Component {
   }
 
   validateUserForm(index) {
-    return (
-      this.validatePresence(this.state.users[index].username)
-    );
+    return this.validatePresence(this.state.users[index].username);
   }
 
   render() {
@@ -613,8 +599,7 @@ class DomainPage extends Component {
                       index={i}
                       client={client}
                       handleFieldChange={(name, value) =>
-                        this.handleFieldChange(name, value, i)
-                      }
+                        this.handleFieldChange(name, value, i)}
                       handleSave={this.onClientSave.bind(this)}
                       validateClientForm={this.validateClientForm.bind(this)}
                       isClientSaved={this.state.clients[i].isClientSaved}
@@ -622,14 +607,14 @@ class DomainPage extends Component {
                       isError={this.props.isError}
                       feedbackMessage={this.props.feedbackMessage}
                       inputRef={el => (this.clientElement = el)}
-                      confirmClientDelete={this.confirmClientDelete}
+                      confirmClientDelete={this.handleDelete}
                     />
                   ))
                 ) : (
-                    <div className="DomainPage__clients-msg">
-                      No Clients Added Yet
+                  <div className="DomainPage__clients-msg">
+                    No Clients Added Yet
                   </div>
-                  )}
+                )}
               </Tab>
               <Tab label="ROLES" className="DomainPage__roles-tab">
                 {loadingRoles ? (
@@ -651,16 +636,16 @@ class DomainPage extends Component {
                       focusOnText={this.focusOnText}
                       blurOnText={this.blurOnText}
                       inputRef={el => (this.roleElement = el)}
-                      confirmRoleDelete={this.confirmRoleDelete}
+                      confirmRoleDelete={this.handleDelete}
                     />
                   ))
                 ) : (
-                    <div>
-                      <h1 className="DomainPage__roles--no-data">
-                        No Roles Added Yet
+                  <div>
+                    <h1 className="DomainPage__roles--no-data">
+                      No Roles Added Yet
                     </h1>
-                    </div>
-                  )}
+                  </div>
+                )}
               </Tab>
               <Tab label="USERS" className="DomainPage__users-tab">
                 {users.length !== 0 ? (
@@ -670,8 +655,7 @@ class DomainPage extends Component {
                       index={i}
                       user={user}
                       handleUserFieldChange={(name, value) =>
-                        this.handleUserFieldChange(name, value, i)
-                      }
+                        this.handleUserFieldChange(name, value, i)}
                       removeUser={i => this.removeUser(i)}
                       validateUserForm={this.validateUserForm.bind(this)}
                       saveUser={() => this.onUserSave(i)}
@@ -680,19 +664,31 @@ class DomainPage extends Component {
                       showAsSaved={this.state.users[i].showAsSaved}
                       isErrorForUser={this.props.isErrorForUser}
                       UserFeedbackMessage={this.props.UserFeedbackMessage}
-                      handleRoleChange={(value, value_one, value_two, value_three, i) =>
-                        this.handleRoleChange(value, value_one, value_two, value_three, i)}
-                      confirmUserDelete={this.confirmUserDelete}
+                      handleRoleChange={(
+                        value,
+                        value_one,
+                        value_two,
+                        value_three,
+                        i
+                      ) =>
+                        this.handleRoleChange(
+                          value,
+                          value_one,
+                          value_two,
+                          value_three,
+                          i
+                        )}
+                      confirmUserDelete={this.handleDelete}
                       inputRef={el => (this.userElement = el)}
                       ischecked={this.state.ischecked}
                       counter={this.state.counter}
                     />
                   ))
                 ) : (
-                    <div className="DomainPage__users-msg">
-                      No Users Added Yet
+                  <div className="DomainPage__users-msg">
+                    No Users Added Yet
                   </div>
-                  )}
+                )}
               </Tab>
             </Tabs>
           </TabsContainer>

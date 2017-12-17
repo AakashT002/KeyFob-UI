@@ -32,7 +32,7 @@ class Header extends Component {
             <label>{username}</label>
           </div>
           <div className="Header__sign-out">
-            <Button className="Header__sign-out-button" onClick={this.logout}>
+            <Button flat className="Header__sign-out-button" onClick={this.logout}>
               Logout&gt;
             </Button>
           </div>
@@ -49,7 +49,7 @@ class Header extends Component {
   renderTitle() {
     return (
       <div className="Header__info">
-        <Button primary className="Header_home" onClick={this.handleClick}>
+        <Button flat primary className="Header_home" onClick={this.handleClick}>
           <img src={Home_logo} className="Header__home-logo" alt="logo" />
           <h4 className="Header_home-text">Home</h4>
         </Button>
