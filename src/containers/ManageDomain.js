@@ -73,12 +73,16 @@ export class ManageDomain extends Component {
 
   componentWillUpdate() {
     let domains = this.state.domainList.filter(domain => {
-      return domain.realm !== 'master' && domain.id.length > 0 && 
-      domain.realm === domain.id;
+      return (
+        domain.realm !== 'master' &&
+        domain.id.length > 0 &&
+        domain.realm === domain.id
+      );
     });
 
-    if(domains.length > 0) {
-      keycloak.updateToken(60)
+    if (domains.length > 0) {
+      keycloak
+        .updateToken(60)
         .success(() => {
           sessionStorage.setItem('kctoken', keycloak.token);
           this.loadDomainList();

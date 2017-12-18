@@ -23,9 +23,8 @@ class User {
   }
 
   static async assignRole(realm, userId, roleObj) {
-    const API_URL = `${
-      process.env.REACT_APP_AUTH_URL
-      }/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
+    const API_URL = `${process.env
+      .REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
     const token = sessionStorage.kctoken;
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -177,9 +176,8 @@ class User {
   }
 
   static async unAssignRoles(realm, userId, roleObj) {
-    const API_URL = `${
-      process.env.REACT_APP_AUTH_URL
-      }/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
+    const API_URL = `${process.env
+      .REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
     const token = sessionStorage.kctoken;
     const response = await fetch(API_URL, {
       method: 'DELETE',

@@ -74,4 +74,36 @@
       color: $light-pink;
     }
   }
+
+  .TeamForm__register-pass {
+    color: $light-green;
+    margin-left: -465px;
+    padding-right: 390px;  
+
+    .md-avatar {
+      border: 2px solid $light-green;
+      height: 20px;
+      width: 20px;
+    }
+  }
+
+  .TeamForm__saved-icon {
+    font-size: 12px;
+  }
+
+  .TeamForm__register-fail {
+    color: $red;
+    margin-left: -465px;
+    padding-right: 260px;
+
+    .md-avatar {
+      border: 2px solid $red;
+      height: 20px;
+      width: 20px;
+    }
+  }
+
+  .TeamForm__saved-icon {
+    font-size: 12px;
+  }
 } 

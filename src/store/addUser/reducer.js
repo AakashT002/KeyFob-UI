@@ -121,7 +121,11 @@ export const addUser = createReducer(initialUsersState, {
   },
 
   [ActionTypes.ASSIGN_USER_ROLE_FAILURE](state, action) {
-    return { ...state, requesting: false, UserFeedbackMessage: action.error.message, };
+    return {
+      ...state,
+      requesting: false,
+      UserFeedbackMessage: action.error.message,
+    };
   },
 
   [ActionTypes.UNASSIGN_USER_ROLE_REQUEST](state) {
@@ -133,7 +137,11 @@ export const addUser = createReducer(initialUsersState, {
   },
 
   [ActionTypes.UNASSIGN_USER_ROLE_FAILURE](state, action) {
-    return { ...state, requesting: false, UserFeedbackMessage: action.error.message, };
+    return {
+      ...state,
+      requesting: false,
+      UserFeedbackMessage: action.error.message,
+    };
   },
 });
 

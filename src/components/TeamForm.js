@@ -6,10 +6,55 @@ import {
   Button,
   SelectField,
   Checkbox,
+  IconSeparator,
+  Avatar,
 } from 'react-md';
 import '../assets/stylesheets/TeamForm.css';
 
-const TeamForm = ({ index, team, domains, handleDomainChange, confirmTeamDelete }) => {
+const TeamForm = ({
+  team,
+  handleTeamChange,
+  index,
+  validateTeamForm,
+  isTeamSaved,
+  onTeamSave,
+  isErrorForTeam,
+  teamFeedbackMessage,
+  showAsSaved,
+  domains,
+  handleDomainChange,
+  confirmTeamDelete,
+}) => {
+  const renderMessageForTeam = () => {
+    if (!isErrorForTeam) {
+      return (
+        <IconSeparator
+          label={teamFeedbackMessage}
+          iconBefore
+          className="TeamForm__register-pass"
+        >
+          <Avatar
+            icon={<i className="material-icons TeamForm__saved-icon">done</i>}
+            suffix="white"
+          />
+        </IconSeparator>
+      );
+    } else {
+      return (
+        <IconSeparator
+          label={teamFeedbackMessage}
+          iconBefore
+          className="TeamForm__register-fail"
+        >
+          <Avatar
+            icon={<i className="material-icons TeamForm__saved-icon">clear</i>}
+            suffix="white"
+          />
+        </IconSeparator>
+      );
+    }
+  };
+
   const isDomainSelected = domainId => {
     if (team.domains.length > 0) {
       for (var r = 0; r < team.domains.length; r++) {
@@ -33,8 +78,7 @@ const TeamForm = ({ index, team, domains, handleDomainChange, confirmTeamDelete 
           value={domain.id}
           key={i}
           onChange={value =>
-            handleDomainChange(value, domain.clientId, domain.id, index)
-          }
+            handleDomainChange(value, domain.clientId, domain.id, index)}
           checked={isDomainSelected(domain.id)}
         />
       );
@@ -50,7 +94,9 @@ const TeamForm = ({ index, team, domains, handleDomainChange, confirmTeamDelete 
               id="team"
               required
               className="md-cell  TeamForm__team-name"
+              label={team.id && team.id.length > 0 ? '' : 'New Team Name'}
               value={team.name}
+              onChange={value => handleTeamChange(value, index)}
             />
             <SelectField
               id="domain-dropdown"
@@ -65,7 +111,13 @@ const TeamForm = ({ index, team, domains, handleDomainChange, confirmTeamDelete 
             />
           </CardActions>
           <CardActions className="TeamForm__bottom-section">
-            <Button className="TeamForm__save" flat>
+            {showAsSaved === true && renderMessageForTeam()}
+            <Button
+              className="TeamForm__save"
+              disabled={!validateTeamForm(index) || isTeamSaved === true}
+              flat
+              onClick={() => onTeamSave(index)}
+            >
               SAVE
             </Button>
             <Button
@@ -83,9 +135,16 @@ const TeamForm = ({ index, team, domains, handleDomainChange, confirmTeamDelete 
 };
 
 TeamForm.propTypes = {
+  handleTeamChange: PropTypes.func,
   team: PropTypes.object,
   confirmTeamDelete: PropTypes.func,
   index: PropTypes.number,
+  validateTeamForm: PropTypes.func,
+  isTeamSaved: PropTypes.bool,
+  teamFeedbackMessage: PropTypes.string,
+  isErrorForTeam: PropTypes.bool,
+  showAsSaved: PropTypes.bool,
+  onTeamSave: PropTypes.func,
   handleDomainChange: PropTypes.func,
   domains: PropTypes.array,
 };
