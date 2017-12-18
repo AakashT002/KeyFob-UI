@@ -65,5 +65,13 @@
 		.md-divider {
 			background-color: $black  ;
 		} 
+
+    .md-text--theme-secondary {
+      color: $light-pink;
+    }
+
+    .md-text--error {
+      color: $light-pink;
+    }
   }
 } 

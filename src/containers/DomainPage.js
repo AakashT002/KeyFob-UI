@@ -120,7 +120,9 @@ class DomainPage extends Component {
         if (!IGNORED_CLIENTS.includes(client.clientId.toString())) {
           if (this.state.currentdomainName === 'master') {
             if (
-              client.clientId.substr(client.clientId.length - 6, 6) !== '-realm'
+              client.clientId.substr(client.clientId.length - 6, 6) ===
+                '-realm' &&
+              client.clientId !== 'master-realm'
             ) {
               let clientObj = {
                 clientId: client.clientId,
@@ -191,6 +193,7 @@ class DomainPage extends Component {
         let teamObj = {
           id: teamList[j].id,
           name: teamList[j].name,
+          domains: [],
         };
         teams = teams.concat([teamObj]);
       }
@@ -527,7 +530,17 @@ class DomainPage extends Component {
     return (
       <Tab label="TEAMS" className="DomainPage__roles-tab">
         {teams.length > 0 ? (
-          teams.map((team, i) => <TeamForm key={i} index={i} team={team} />)
+          teams.map((team, i) => (
+            <TeamForm
+              key={i}
+              index={i}
+              team={team}
+              handleDomainChange={(value, domainName, domainId, userIndex) =>
+                this.handleDomainChange(value, domainName, domainId, userIndex)
+              }
+              domains={this.state.clients}
+            />
+          ))
         ) : (
           <div className="DomainPage__teams--no-data">No Teams Added Yet</div>
         )}
@@ -551,7 +564,8 @@ class DomainPage extends Component {
               index={i}
               client={client}
               handleFieldChange={(name, value) =>
-                this.handleFieldChange(name, value, i)}
+                this.handleFieldChange(name, value, i)
+              }
               handleSave={this.onClientSave.bind(this)}
               validateClientForm={this.validateClientForm.bind(this)}
               isClientSaved={this.state.clients[i].isClientSaved}
@@ -617,7 +631,8 @@ class DomainPage extends Component {
               index={i}
               user={user}
               handleUserFieldChange={(name, value) =>
-                this.handleUserFieldChange(name, value, i)}
+                this.handleUserFieldChange(name, value, i)
+              }
               removeUser={i => this.removeUser(i)}
               validateUserForm={this.validateUserForm.bind(this)}
               saveUser={() => this.onUserSave(i)}
@@ -633,7 +648,8 @@ class DomainPage extends Component {
                   value_two,
                   value_three,
                   i
-                )}
+                )
+              }
               confirmUserDelete={this.handleDelete}
               inputRef={el => (this.userElement = el)}
               ischecked={this.state.ischecked}
@@ -730,6 +746,63 @@ class DomainPage extends Component {
       });
     }
   }
+
+  handleDomainChange(value, domainName, domainId, index) {
+    if (value) {
+      this.setState(() => {
+        let existingTeams = this.state.teams;
+        let team = existingTeams[index];
+        let found = false;
+        if (team.domains.length > 0) {
+          for (var r = 0; r < team.domains.length; r++) {
+            if (team.domains[r].id === domainId) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            team.domains.push({ id: domainId, name: domainName });
+          }
+        } else {
+          team.domains.push({ id: domainId, name: domainName });
+        }
+        return {
+          teams: existingTeams,
+        };
+      });
+    } else {
+      this.setState(() => {
+        let existingTeams = this.state.teams;
+        let team = existingTeams[index];
+        let _foundAt = -1;
+        if (team.domains.length > 0) {
+          for (var r = 0; r < team.domains.length; r++) {
+            if (team.domains[r].id === domainId) {
+              _foundAt = r;
+              break;
+            }
+          }
+          if (_foundAt >= 0) {
+            team.domains.splice(_foundAt, 1);
+          }
+        }
+        return {
+          teams: existingTeams,
+        };
+      });
+    }
+  }
+
+  // checkDomains(index) {
+  //   const client = this.state.clients[index];
+  //   const realm = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
+
+  //   if (client.domains.length > 0) {
+  //     this.props.dispatch(
+  //       handleUserRoleAssignment(realm, client.id, client.domains)
+  //     );
+  //   }
+  // }
 
   onUserSave(index) {
     const realm = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
