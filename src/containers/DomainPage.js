@@ -29,7 +29,7 @@ import {
   handleClientDeletion,
   stopClientSpinner,
 } from '../store/client/action';
-import { loadTeams } from '../store/team/action';
+import { loadTeams, handleTeamDeletion } from '../store/team/action';
 
 import {
   loadRoles,
@@ -447,6 +447,13 @@ class DomainPage extends Component {
     this.setState({ users });
   }
 
+  _removeTeam(index) {
+    const { teams } = this.state;
+    this.resetDeleteObj();
+    teams.splice(index, 1);
+    this.setState({ teams });
+  }
+
   _isClientsTab() {
     const { activeTab } = this.state;
     return !this.isMasterDomain() && activeTab === 0;
@@ -500,7 +507,13 @@ class DomainPage extends Component {
         this._removeUser(index);
       }
     } else if (this._isTeamsTab()) {
-      //TODO : Pending
+      if (id && id !== '') {
+        this.props
+          .dispatch(handleTeamDeletion(currentdomainName, id))
+          .then(this._removeTeam(index));
+      } else {
+        this._removeTeam(index);
+      }
     }
   }
 
@@ -532,9 +545,10 @@ class DomainPage extends Component {
         {teams.length > 0 ? (
           teams.map((team, i) => (
             <TeamForm
-              key={i}
+              key={team.id}
               index={i}
               team={team}
+              confirmTeamDelete={this.handleDelete}
               handleDomainChange={(value, domainName, domainId, userIndex) =>
                 this.handleDomainChange(value, domainName, domainId, userIndex)
               }

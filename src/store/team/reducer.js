@@ -39,6 +39,15 @@ export const team = createReducer(initialTeamsState, {
   [ActionTypes.FETCH_TEAMS_FAILURE](state) {
     return { ...state, requesting: false };
   },
+  [ActionTypes.DELETE_TEAM_REQUEST](state) {
+    return { ...state, requesting: true };
+  },
+  [ActionTypes.DELETE_TEAM_SUCCESS](state) {
+    return { ...state, requesting: true };
+  },
+  [ActionTypes.DELETE_TEAM_FAILURE](state) {
+    return { ...state, requesting: false };
+  },
 });
 
 export default team;

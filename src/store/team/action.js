@@ -16,3 +16,19 @@ export const loadTeams = domainName => ({
   },
   type: '',
 });
+
+export const handleTeamDeletion = (currentdomainName, id) => ({
+  types: [
+    ActionTypes.DELETE_TEAM_REQUEST,
+    ActionTypes.DELETE_TEAM_SUCCESS,
+    ActionTypes.DELETE_TEAM_FAILURE,
+  ],
+  callAPI: async () => {
+    try {
+      return await Teams.delete(currentdomainName, id);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+  type: '',
+});

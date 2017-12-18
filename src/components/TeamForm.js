@@ -9,7 +9,7 @@ import {
 } from 'react-md';
 import '../assets/stylesheets/TeamForm.css';
 
-const TeamForm = ({ index, team, domains, handleDomainChange }) => {
+const TeamForm = ({ index, team, domains, handleDomainChange, confirmTeamDelete }) => {
   const isDomainSelected = domainId => {
     if (team.domains.length > 0) {
       for (var r = 0; r < team.domains.length; r++) {
@@ -68,7 +68,11 @@ const TeamForm = ({ index, team, domains, handleDomainChange }) => {
             <Button className="TeamForm__save" flat>
               SAVE
             </Button>
-            <Button className="TeamForm__remove" flat>
+            <Button
+              className="TeamForm__remove"
+              flat
+              onClick={() => confirmTeamDelete(index, team.id)}
+            >
               REMOVE
             </Button>
           </CardActions>
@@ -80,6 +84,7 @@ const TeamForm = ({ index, team, domains, handleDomainChange }) => {
 
 TeamForm.propTypes = {
   team: PropTypes.object,
+  confirmTeamDelete: PropTypes.func,
   index: PropTypes.number,
   handleDomainChange: PropTypes.func,
   domains: PropTypes.array,
