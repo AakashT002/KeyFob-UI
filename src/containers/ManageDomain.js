@@ -5,6 +5,8 @@ import { SyncLoader } from 'react-spinners';
 import { Card, Button, DataTable, TableBody, DialogContainer } from 'react-md';
 
 import Domain from '../components/Domain';
+import keycloak from '../keycloak-config';
+
 import {
   CLIENT_TYPES,
   CURRENT_DOMAIN_NAME,
@@ -66,10 +68,29 @@ export class ManageDomain extends Component {
   }
 
   componentWillMount() {
-    const { dispatch } = this.props;
+    this.loadDomainList();
+  }
 
+  componentWillUpdate() {
+    let domains = this.state.domainList.filter(domain => {
+      return domain.realm !== 'master' && domain.id.length > 0 && 
+      domain.realm === domain.id;
+    });
+
+    if(domains.length > 0) {
+      keycloak.updateToken(60)
+        .success(() => {
+          sessionStorage.setItem('kctoken', keycloak.token);
+          this.loadDomainList();
+        })
+        .error(() => keycloak.logout());
+    }
+  }
+
+  loadDomainList() {
+    const { dispatch } = this.props;
     dispatch(loadDomains()).then(() => {
-      const { domainList } = this.props;
+      const { dispatch, domainList } = this.props;
       domainList.map(realm => {
         realm.oldRealmName = realm.realm;
         dispatch(getUser(domainList, realm.realm));
