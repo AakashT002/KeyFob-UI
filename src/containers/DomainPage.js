@@ -46,6 +46,7 @@ import {
   DELETE_ROLE_MESSAGE,
   DELETE_CLIENT_MESSAGE,
   DELETE_USER_MESSAGE,
+  DELETE_TEAM_MESSAGE,
 } from '../utils/constants';
 
 import Roles from '../components/Roles';
@@ -118,7 +119,7 @@ class DomainPage extends Component {
       clientList.forEach(client => {
         if (!IGNORED_CLIENTS.includes(client.clientId.toString())) {
           if (this.state.currentdomainName === 'master') {
-           if (
+            if (
               client.clientId.substr(client.clientId.length - 6, 6) !== '-realm'
             ) {
               let clientObj = {
@@ -234,16 +235,10 @@ class DomainPage extends Component {
   }
 
   handlePlusClick() {
-    const { clients, roles, activeTab } = this.state;
+    const { clients, roles } = this.state;
     this.setState({ focusOnNewElement: true });
-    const isClientsTab = !this.isMasterDomain() && activeTab === 0;
-    const isTeamsTab = this.isMasterDomain() && activeTab === 0;
-    const isRolesTab = !this.isMasterDomain() && activeTab === 1;
-    const isUsersTab =
-      (!this.isMasterDomain() && activeTab === 2) ||
-      (this.isMasterDomain() && activeTab === 1);
 
-    if (isClientsTab) {
+    if (this._isClientsTab()) {
       if (
         this.state.clients.length === 0 ||
         this.state.clients[0].id !== undefined
@@ -272,7 +267,7 @@ class DomainPage extends Component {
           this.setState({ clients });
         });
       }
-    } else if (isRolesTab) {
+    } else if (this._isRolesTab()) {
       let role = {
         id: '',
         name: '',
@@ -287,13 +282,13 @@ class DomainPage extends Component {
         roles.splice(0, 0, role);
         this.setState({ roles });
       }
-    } else if (isUsersTab) {
+    } else if (this._isUsersTab()) {
       this.props
         .dispatch(addBlankUser(this.state.currentdomainName))
         .then(() => {
           this.setState({ users: this.props.users });
         });
-    } else if (isTeamsTab) {
+    } else if (this._isTeamsTab()) {
       this.setState({ teams: [] }); // TODO : Pending...
     }
   }
@@ -414,19 +409,17 @@ class DomainPage extends Component {
   }
 
   handleDelete(index, id) {
-    const newObj = this.state.deleteObj;
-    newObj.selectedId = id;
-    newObj.selectedIndex = index;
+    const deleteObj = this.state.deleteObj;
+    deleteObj.selectedId = id;
+    deleteObj.selectedIndex = index;
     if (id !== undefined && id !== '') {
-      newObj.deleteModalVisible = true;
+      deleteObj.deleteModalVisible = true;
     } else {
-      newObj.deleteModalVisible = false;
+      deleteObj.deleteModalVisible = false;
     }
-    this.setState({
-      deleteObj: newObj,
-    });
+    this.setState({ deleteObj });
     if (id === undefined || id === '') {
-      this.remove(this.state.activeTab, this.state.deleteObj);
+      this.remove(deleteObj);
     }
   }
 
@@ -451,35 +444,60 @@ class DomainPage extends Component {
     this.setState({ users });
   }
 
-  remove(activeTab, deleteObj) {
+  _isClientsTab() {
+    const { activeTab } = this.state;
+    return !this.isMasterDomain() && activeTab === 0;
+  }
+
+  _isTeamsTab() {
+    const { activeTab } = this.state;
+    return this.isMasterDomain() && activeTab === 0;
+  }
+
+  _isRolesTab() {
+    const { activeTab } = this.state;
+    return !this.isMasterDomain() && activeTab === 1;
+  }
+
+  _isUsersTab() {
+    const { activeTab } = this.state;
+    return (
+      (this.isMasterDomain() && activeTab === 1) ||
+      (!this.isMasterDomain() && activeTab === 2)
+    );
+  }
+
+  remove(deleteObj) {
     const index = deleteObj.selectedIndex;
     const id = deleteObj.selectedId;
-
     const currentdomainName = this.state.currentdomainName;
-    if (activeTab === 0) {
-      if (id !== '') {
+
+    if (this._isClientsTab()) {
+      if (id && id !== '') {
         this.props
           .dispatch(handleClientDeletion(id, currentdomainName))
           .then(this._removeClient(index));
       } else {
         this._removeClient(index);
       }
-    } else if (activeTab === 1) {
-      if (id !== '') {
+    } else if (this._isRolesTab()) {
+      if (id && id !== '') {
         this.props
           .dispatch(handleRoleDeletion(id, currentdomainName))
           .then(this._removeRole(index));
       } else {
         this._removeRole(index);
       }
-    } else if (activeTab === 2) {
-      if (id !== '') {
+    } else if (this._isUsersTab()) {
+      if (id && id !== '') {
         this.props
           .dispatch(handleUserDeletion(currentdomainName, id))
           .then(this._removeUser(index));
       } else {
         this._removeUser(index);
       }
+    } else if (this._isTeamsTab()) {
+      //TODO : Pending
     }
   }
 
@@ -508,13 +526,9 @@ class DomainPage extends Component {
     const { teams } = this.state;
     return (
       <Tab label="TEAMS" className="DomainPage__roles-tab">
-        {teams.length > 0 ?
-         (teams.map((team, i) => <TeamForm
-           key={i} 
-           index={i} 
-           team={team} 
-         />)) :         
-           (
+        {teams.length > 0 ? (
+          teams.map((team, i) => <TeamForm key={i} index={i} team={team} />)
+        ) : (
           <div className="DomainPage__teams--no-data">No Teams Added Yet</div>
         )}
       </Tab>
@@ -537,8 +551,7 @@ class DomainPage extends Component {
               index={i}
               client={client}
               handleFieldChange={(name, value) =>
-                this.handleFieldChange(name, value, i)
-              }
+                this.handleFieldChange(name, value, i)}
               handleSave={this.onClientSave.bind(this)}
               validateClientForm={this.validateClientForm.bind(this)}
               isClientSaved={this.state.clients[i].isClientSaved}
@@ -546,7 +559,7 @@ class DomainPage extends Component {
               isError={this.props.isError}
               feedbackMessage={this.props.feedbackMessage}
               inputRef={el => (this.clientElement = el)}
-              confirmClientDelete={this.confirmClientDelete}
+              confirmClientDelete={this.handleDelete}
             />
           ))
         ) : (
@@ -581,7 +594,7 @@ class DomainPage extends Component {
               focusOnText={this.focusOnText}
               blurOnText={this.blurOnText}
               inputRef={el => (this.roleElement = el)}
-              confirmRoleDelete={this.confirmRoleDelete}
+              confirmRoleDelete={this.handleDelete}
             />
           ))
         ) : (
@@ -604,8 +617,7 @@ class DomainPage extends Component {
               index={i}
               user={user}
               handleUserFieldChange={(name, value) =>
-                this.handleUserFieldChange(name, value, i)
-              }
+                this.handleUserFieldChange(name, value, i)}
               removeUser={i => this.removeUser(i)}
               validateUserForm={this.validateUserForm.bind(this)}
               saveUser={() => this.onUserSave(i)}
@@ -621,9 +633,8 @@ class DomainPage extends Component {
                   value_two,
                   value_three,
                   i
-                )
-              }
-              confirmUserDelete={this.confirmUserDelete}
+                )}
+              confirmUserDelete={this.handleDelete}
               inputRef={el => (this.userElement = el)}
               ischecked={this.state.ischecked}
               counter={this.state.counter}
@@ -655,28 +666,28 @@ class DomainPage extends Component {
     );
   }
 
-  determineModalMessage(activeTab) {
-    let modalMessage;
-    if (activeTab === 0) {
-      modalMessage = DELETE_CLIENT_MESSAGE;
-    } else if (activeTab === 1) {
-      modalMessage = DELETE_ROLE_MESSAGE;
-    } else if (activeTab === 2) {
-      modalMessage = DELETE_USER_MESSAGE;
+  determineModalMessage() {
+    if (this._isTeamsTab()) {
+      return DELETE_TEAM_MESSAGE;
+    } else if (this._isClientsTab()) {
+      return DELETE_CLIENT_MESSAGE;
+    } else if (this._isRolesTab()) {
+      return DELETE_ROLE_MESSAGE;
+    } else if (this._isUsersTab()) {
+      return DELETE_USER_MESSAGE;
     }
-    return modalMessage;
   }
 
-  determineTitle(activeTab) {
-    let titleMessage;
-    if (activeTab === 0) {
-      titleMessage = 'Remove Client';
-    } else if (activeTab === 1) {
-      titleMessage = 'Remove Role';
-    } else if (activeTab === 2) {
-      titleMessage = 'Remove User';
+  determineTitle() {
+    if (this._isTeamsTab()) {
+      return 'Remove Team';
+    } else if (this._isClientsTab()) {
+      return 'Remove Client';
+    } else if (this._isRolesTab()) {
+      return 'Remove Role';
+    } else if (this._isUsersTab()) {
+      return 'Remove User';
     }
-    return titleMessage;
   }
 
   handleUserFieldChange(name, value, i) {
@@ -755,8 +766,6 @@ class DomainPage extends Component {
 
   render() {
     const { activeTab } = this.state;
-    let modalMessage = this.determineModalMessage(activeTab);
-    let titleMessage = this.determineTitle(activeTab);
     let applicableTabs = null;
     if (this.state.currentdomainName === 'master') {
       applicableTabs = this.renderMasterDomainTabs();
@@ -806,7 +815,7 @@ class DomainPage extends Component {
           id="deleteModal-roles"
           dialogClassName="deleteModal-modal"
           visible={this.state.deleteObj.deleteModalVisible}
-          title={titleMessage}
+          title={this.determineTitle()}
           onHide={() => {
             const newObj = this.state.deleteObj;
             newObj.selectedId = '';
@@ -820,7 +829,7 @@ class DomainPage extends Component {
         >
           <br />
           <p id="deleteModalDescription">
-            {modalMessage}
+            {this.determineModalMessage()}
             <br />
             <br />
             <br />
@@ -842,7 +851,7 @@ class DomainPage extends Component {
                 className="DomainPage__roles--delete-yes"
                 flat
                 onClick={() => {
-                  this.remove(activeTab, this.state.deleteObj);
+                  this.remove(this.state.deleteObj);
                 }}
               >
                 <label className="DomainPage__roles--delete-label-yes">
