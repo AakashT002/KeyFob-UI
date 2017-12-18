@@ -16,6 +16,21 @@ export const handleUserCreation = (realm, userObj) => ({
   },
 });
 
+export const handleUserRoleAssignment = (realm, userId, roleObj) => ({
+  types: [
+    ActionTypes.ASSIGN_USER_ROLE_REQUEST,
+    ActionTypes.ASSIGN_USER_ROLE_SUCCESS,
+    ActionTypes.ASSIGN_USER_ROLE_FAILURE,
+  ],
+  callAPI: async () => {
+    try {
+      return await User.assignRole(realm, userId, roleObj);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+});
+
 export const handleUserDeletion = (str, index) => ({
   types: [
     ActionTypes.DELETE_USER_REQUEST,
@@ -79,3 +94,18 @@ export const handleEmailValidation = (email, realmName) => ({
 export function setResponseHeader() {
   return { type: ActionTypes.SET_RESPONSEHEADER };
 }
+
+export const unAssignUserRoles = (realm, userId, roleObj) => ({
+  types: [
+    ActionTypes.UNASSIGN_USER_ROLE_REQUEST,
+    ActionTypes.UNASSIGN_USER_ROLE_SUCCESS,
+    ActionTypes.UNASSIGN_USER_ROLE_FAILURE,
+  ],
+  callAPI: async () => {
+    try {
+      return await User.unAssignRoles(realm, userId, roleObj);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+});

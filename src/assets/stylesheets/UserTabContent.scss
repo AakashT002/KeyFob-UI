@@ -94,6 +94,10 @@
   display: flex;
   justify-content: center;
   justify-content: space-around;
+
+  .md-list {
+    max-height: 120px;
+  }
 }
 
 .half-fields {

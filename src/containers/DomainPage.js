@@ -11,11 +11,13 @@ import {
   DialogContainer,
 } from 'react-md';
 import PropTypes from 'prop-types';
-import { fetchUsers, addBlankUser } from '../store/users/action';
+import { fetchUsers, addBlankUser, loadUserRoles } from '../store/users/action';
 import {
   handleUserCreation,
   handleUserDeletion,
   handleUserUpdate,
+  handleUserRoleAssignment,
+  unAssignUserRoles,
 } from '../store/addUser/action';
 
 import ClientForm from '../components/ClientForm';
@@ -70,7 +72,6 @@ class DomainPage extends Component {
         deleteModalVisible: false,
       },
       isChecked: false,
-      counter: 0,
     };
 
     this.handleTabChange = this.handleTabChange.bind(this);
@@ -91,25 +92,39 @@ class DomainPage extends Component {
       let existingUsers = [];
       const { users } = this.props;
       users.forEach(user => {
-        let userObj = {
-          username: user.username,
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
-          email: user.email,
-          enabled: true,
-          credentials: [
-            {
-              type: 'password',
-              value: 'password',
-            },
-          ],
-          isUserSaved: true,
-          showAsSaved: false,
-          id: user.id,
-        };
-        existingUsers = existingUsers.concat([userObj]);
+        let assignedUserRoles = [];
+        dispatch(loadUserRoles(this.state.currentdomainName, user.id)).then(() => {
+          const { userRoles } = this.props;
+          userRoles.forEach(_userRole => {
+            if (!IGNORED_ROLES.includes(_userRole.name.toString())) {
+              let role = {
+                id: _userRole.id,
+                name: _userRole.name,
+              };
+              assignedUserRoles.push(role);
+            }
+          });
+          let userObj = {
+            username: user.username,
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            email: user.email,
+            enabled: true,
+            realmRoles: assignedUserRoles || [],
+            credentials: [
+              {
+                type: 'password',
+                value: 'password',
+              },
+            ],
+            isUserSaved: true,
+            showAsSaved: false,
+            id: user.id,
+          };
+          existingUsers = existingUsers.concat([userObj]);
+          this.setState({ users: existingUsers });
+        });
       });
-      this.setState({ users: existingUsers });
     });
 
     dispatch(loadClients(this.state.currentdomainName)).then(() => {
@@ -121,7 +136,7 @@ class DomainPage extends Component {
           if (this.state.currentdomainName === 'master') {
             if (
               client.clientId.substr(client.clientId.length - 6, 6) ===
-                '-realm' &&
+              '-realm' &&
               client.clientId !== 'master-realm'
             ) {
               let clientObj = {
@@ -238,7 +253,7 @@ class DomainPage extends Component {
   }
 
   handlePlusClick() {
-    const { clients, roles } = this.state;
+    const { clients, roles, users } = this.state;
     this.setState({ focusOnNewElement: true });
 
     if (this._isClientsTab()) {
@@ -287,7 +302,7 @@ class DomainPage extends Component {
       }
     } else if (this._isUsersTab()) {
       this.props
-        .dispatch(addBlankUser(this.state.currentdomainName))
+        .dispatch(addBlankUser(this.state.currentdomainName, users))
         .then(() => {
           this.setState({ users: this.props.users });
         });
@@ -556,8 +571,8 @@ class DomainPage extends Component {
             />
           ))
         ) : (
-          <div className="DomainPage__teams--no-data">No Teams Added Yet</div>
-        )}
+            <div className="DomainPage__teams--no-data">No Teams Added Yet</div>
+          )}
       </Tab>
     );
   }
@@ -591,8 +606,8 @@ class DomainPage extends Component {
             />
           ))
         ) : (
-          <div className="DomainPage__clients-msg">No Clients Added Yet</div>
-        )}
+              <div className="DomainPage__clients-msg">No Clients Added Yet</div>
+            )}
       </Tab>
     );
   }
@@ -626,10 +641,10 @@ class DomainPage extends Component {
             />
           ))
         ) : (
-          <div>
-            <h1 className="DomainPage__roles--no-data">No Roles Added Yet</h1>
-          </div>
-        )}
+              <div>
+                <h1 className="DomainPage__roles--no-data">No Roles Added Yet</h1>
+              </div>
+            )}
       </Tab>
     );
   }
@@ -655,15 +670,12 @@ class DomainPage extends Component {
               showAsSaved={this.state.users[i].showAsSaved}
               isErrorForUser={this.props.isErrorForUser}
               UserFeedbackMessage={this.props.UserFeedbackMessage}
-              handleRoleChange={(value, value_one, value_two, value_three, i) =>
+              handleRoleChange={(
+                value, roleName, roleId, userIndex, checkBoxIndex
+              ) =>
                 this.handleRoleChange(
-                  value,
-                  value_one,
-                  value_two,
-                  value_three,
-                  i
-                )
-              }
+                  value, roleName, roleId, userIndex, checkBoxIndex
+                )}
               confirmUserDelete={this.handleDelete}
               inputRef={el => (this.userElement = el)}
               ischecked={this.state.ischecked}
@@ -671,8 +683,8 @@ class DomainPage extends Component {
             />
           ))
         ) : (
-          <div className="DomainPage__users-msg">No Users Added Yet</div>
-        )}
+            <div className="DomainPage__users-msg">No Users Added Yet</div>
+          )}
       </Tab>
     );
   }
@@ -736,28 +748,66 @@ class DomainPage extends Component {
     });
   }
 
-  handleRoleChange(value, check, roleName, index, i) {
-    const { counter } = this.state;
-    if (check) {
+  handleRoleChange(value, roleName, roleId, index) {
+    if (value) {
       this.setState(() => {
         let existingUsers = this.state.users;
-        let newUser = existingUsers[index];
-        newUser['realmRoles'].push(roleName);
+        let user = existingUsers[index];
+        let found = false;
+        if (user.realmRoles.length > 0) {
+          for (var r = 0; r < user.realmRoles.length; r++) {
+            if (user.realmRoles[r].id === roleId) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            user.realmRoles.push({ id: roleId, name: roleName });
+            user.isUserSaved = false;
+            user.showAsSaved = false;
+          }
+        } else {
+          user.realmRoles.push({ id: roleId, name: roleName });
+          user.isUserSaved = false;
+          user.showAsSaved = false;
+        }
         return {
-          counter: counter + 1,
           users: existingUsers,
         };
       });
     } else {
       this.setState(() => {
         let existingUsers = this.state.users;
-        let newUser = existingUsers[index];
-        newUser['realmRoles'].splice(i, 1);
+        let user = existingUsers[index];
+        let _foundAt = -1;
+        if (user.realmRoles.length > 0) {
+          for (var r = 0; r < user.realmRoles.length; r++) {
+            if (user.realmRoles[r].id === roleId) {
+              _foundAt = r;
+              break;
+            }
+          }
+          if (_foundAt >= 0) {
+            user.realmRoles.splice(_foundAt, 1);
+            user.isUserSaved = false;
+            user.showAsSaved = false;
+          }
+        }
         return {
-          counter: counter - 1,
           users: existingUsers,
         };
       });
+    }
+  }
+
+  checkRoles(index) {
+    const user = this.state.users[index];
+    const realm = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
+
+    if (user.realmRoles.length > 0) {
+      this.props.dispatch(
+        handleUserRoleAssignment(realm, user.id, user.realmRoles)
+      );
     }
   }
 
@@ -822,17 +872,38 @@ class DomainPage extends Component {
     const realm = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
     var userObject = Object.assign({}, this.state.users[index]);
     var id = userObject.id;
+    var realmRoles = userObject.realmRoles;
     delete userObject['isUserSaved'];
     delete userObject['id'];
     delete userObject['showAsSaved'];
+    delete userObject['realmRoles'];
     if (id !== undefined) {
-      this.props.dispatch(handleUserUpdate(realm, userObject, id)).then(() => {
-        let users = this.state.users;
-        let currentuser = users[index];
-        currentuser.isUserSaved = true;
-        currentuser.showAsSaved = true;
-        this.setState({ users });
-      });
+      if (realmRoles.length >= 0) {
+        this.props.dispatch(unAssignUserRoles(realm, id, this.state.roles)).then(() => {
+          this.props.dispatch(handleUserUpdate(realm, userObject, id)).then(() => {
+            let users = this.state.users;
+            let currentuser = users[index];
+            currentuser.isUserSaved = true;
+            currentuser.showAsSaved = true;
+            if (this.props.isUserSaved) {
+              this.checkRoles(index);
+            }
+            this.setState({ users });
+          });
+        });
+      } else {
+
+        this.props.dispatch(handleUserUpdate(realm, userObject, id)).then(() => {
+          let users = this.state.users;
+          let currentuser = users[index];
+          currentuser.isUserSaved = true;
+          currentuser.showAsSaved = true;
+          if (this.props.isUserSaved) {
+            this.checkRoles(index);
+          }
+          this.setState({ users });
+        });
+      }
     } else {
       this.props.dispatch(handleUserCreation(realm, userObject)).then(() => {
         let users = this.state.users;
@@ -841,6 +912,9 @@ class DomainPage extends Component {
         currentuser.showAsSaved = true;
         if (!this.props.isErrorForUser) {
           currentuser.id = this.props.userId;
+        }
+        if (this.props.isUserSaved) {
+          this.checkRoles(index);
         }
         this.setState({ users });
       });
@@ -982,6 +1056,7 @@ DomainPage.propTypes = {
   UserFeedbackMessage: PropTypes.string,
   isUserSaved: PropTypes.bool,
   userId: PropTypes.string,
+  userRoles: PropTypes.array,
 };
 
 function mapStateToProps(state) {
@@ -1004,6 +1079,7 @@ function mapStateToProps(state) {
     UserFeedbackMessage: state.addUser.UserFeedbackMessage,
     isUserSaved: state.addUser.isUserSaved,
     userId: state.addUser.userId,
+    userRoles: state.users.userRoles,
   };
 }
 

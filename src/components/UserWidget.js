@@ -25,9 +25,7 @@ const UserWidget = ({
   UserFeedbackMessage,
   confirmUserDelete,
   inputRef,
-  ischecked,
   handleRoleChange,
-  counter,
 }) => {
   const renderMessageForUser = () => {
     if (!isErrorForUser) {
@@ -61,6 +59,19 @@ const UserWidget = ({
     }
   };
 
+  const isRoleSelected = roleId => {
+    if (user.realmRoles.length > 0) {
+      for (var r = 0; r < user.realmRoles.length; r++) {
+        if (user.realmRoles[r].id === roleId) {
+          return true;
+        }
+      }
+      return false;
+    } else {
+      return false;
+    }
+  };
+
   const roleChecklist = () => {
     return roles.map((role, i) => {
       return (
@@ -71,8 +82,8 @@ const UserWidget = ({
           value={role.id}
           key={i}
           onChange={value =>
-            handleRoleChange('ischecked', value, role.name, index, i)}
-          checked={ischecked}
+            handleRoleChange(value, role.name, role.id, index, i)}
+          checked={isRoleSelected(role.id)}
         />
       );
     });
@@ -107,7 +118,11 @@ const UserWidget = ({
         <div className="user-attributes">
           <SelectField
             id="role-dropdown"
-            label={counter === 0 ? 'User Roles' : counter + 'Roles'}
+            label={
+              user.realmRoles.length === 0
+                ? 'User Roles'
+                : user.realmRoles.length + ' Roles'
+            }
             className="md-cell md-cell--bottom role-dropdown login-form__input third-fields"
             menuItems={roleChecklist()}
           />
@@ -165,7 +180,6 @@ UserWidget.propTypes = {
   inputRef: PropTypes.func,
   handleRoleChange: PropTypes.func,
   ischecked: PropTypes.bool,
-  counter: PropTypes.number,
 };
 
 export default UserWidget;

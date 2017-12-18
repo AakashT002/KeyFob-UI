@@ -22,6 +22,26 @@ class User {
     }
   }
 
+  static async assignRole(realm, userId, roleObj) {
+    const API_URL = `${
+      process.env.REACT_APP_AUTH_URL
+      }/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
+    const token = sessionStorage.kctoken;
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token,
+      },
+      body: JSON.stringify(roleObj),
+    });
+    if (response.ok) {
+      return response;
+    } else {
+      throw new Error('Unable to assign role.');
+    }
+  }
+
   static async delete(currentdomainName, id) {
     const token = sessionStorage.kctoken;
     const API_URL = `${process.env
@@ -153,6 +173,26 @@ class User {
       return true;
     } else {
       throw new Error('Client already exists.');
+    }
+  }
+
+  static async unAssignRoles(realm, userId, roleObj) {
+    const API_URL = `${
+      process.env.REACT_APP_AUTH_URL
+      }/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
+    const token = sessionStorage.kctoken;
+    const response = await fetch(API_URL, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token,
+      },
+      body: JSON.stringify(roleObj),
+    });
+    if (response.ok) {
+      return response;
+    } else {
+      throw new Error('Unable to unassign role.');
     }
   }
 }

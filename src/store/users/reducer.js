@@ -25,6 +25,15 @@ export const users = createReducer(initialUsersState, {
   [ActionTypes.ADD_BLANK_USER_FAILURE](state) {
     return { ...state, requesting: false };
   },
+  [ActionTypes.LOAD_USER_ROLE_REQUEST](state) {
+    return { ...state, requesting: true };
+  },
+  [ActionTypes.LOAD_USER_ROLE_SUCCESS](state, action) {
+    return { ...state, userRoles: action.response, requesting: false };
+  },
+  [ActionTypes.LOAD_USER_ROLE_FAILURE](state) {
+    return { ...state, requesting: false };
+  },
 });
 
 export default users;

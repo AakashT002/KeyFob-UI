@@ -4,15 +4,14 @@ import UserWidget from './UserWidget';
 
 describe('Component: UserWidget', () => {
   const spy = jest.fn();
-  const user = [
-    {
-      username: '',
-      firstName: '',
-      lastName: '',
-      email: '',
-      id: '',
-    },
-  ];
+  const user = {
+    username: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    id: '',
+    realmRoles: [],
+  };
   const roles = [];
   const wrapper = shallow(
     <UserWidget
