@@ -302,7 +302,7 @@ class DomainPage extends Component {
         id: '',
         name: '',
         isDirty: true,
-        disableButton: '',
+        disableButton: false,
       };
 
       if (roles.length === 0) {
@@ -1043,22 +1043,20 @@ class DomainPage extends Component {
               flat
               disabled={activeTab === 0}
               key="previous"
-              label="Previous"
               className="DomainPage__button-prev"
               onClick={() => this.setState({ activeTab: activeTab - 1 })}
             >
-              keyboard_arrow_left
+              {'< '} Previous
             </Button>
             <Button
               flat
               disabled={activeTab === this.getMaxTabs() - 1}
               key="next"
-              label="Next"
               iconBefore={false}
               className="DomainPage__button-next"
               onClick={() => this.setState({ activeTab: activeTab + 1 })}
             >
-              keyboard_arrow_right
+              Next {' >'}
             </Button>
           </div>
         </Card>
@@ -1079,7 +1077,7 @@ class DomainPage extends Component {
           aria-describedby="deleteModalDescription"
         >
           <br />
-          <p id="deleteModalDescription">
+          <div id="deleteModalDescription">
             {this.determineModalMessage()}
             <br />
             <br />
@@ -1110,7 +1108,7 @@ class DomainPage extends Component {
                 </label>
               </Button>
             </div>
-          </p>
+          </div>
         </DialogContainer>
         <Button
           floating

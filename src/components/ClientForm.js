@@ -90,18 +90,22 @@ const ClientForm = ({
             {showAsSaved === true && renderMessageForClient()}
             <div className="ClientForm__buttons">
               <Button
+                flat
                 className="ClientForm__save"
-                label="SAVE"
                 onClick={() => handleSave(index)}
                 disabled={
                   !validateClientForm(index) || client.isClientSaved !== false
                 }
-              />
+              >
+                SAVE
+              </Button>
               <Button
+                flat
                 className="ClientForm__remove"
-                label="REMOVE"
                 onClick={() => confirmClientDelete(index, client.id)}
-              />
+              >
+                REMOVE
+              </Button>
             </div>
           </CardActions>
         </section>

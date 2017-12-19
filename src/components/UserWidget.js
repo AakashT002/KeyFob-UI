@@ -149,15 +149,19 @@ const UserWidget = ({
           {showAsSaved === true && renderMessageForUser()}
           <Button
             className="UserWidget__save"
-            label="SAVE"
+            flat
             onClick={() => saveUser()}
             disabled={!validateUserForm(index) || isUserSaved !== false}
-          />
+          >
+            SAVE
+          </Button>
           <Button
             className="UserWidget__remove"
-            label="REMOVE"
+            flat
             onClick={() => confirmUserDelete(index, user.id)}
-          />
+          >
+            REMOVE
+          </Button>
         </CardActions>
       </div>
     </div>

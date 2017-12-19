@@ -70,7 +70,7 @@ Roles.propTypes = {
   roleId: PropTypes.string,
   isDirty: PropTypes.bool,
   disableButton: PropTypes.bool,
-  inputRef: PropTypes.object,
+  inputRef: PropTypes.func,
   confirmRoleDelete: PropTypes.func,
 };
 

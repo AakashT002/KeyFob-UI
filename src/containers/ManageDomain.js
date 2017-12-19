@@ -3,9 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
 import { Card, Button, DataTable, TableBody, DialogContainer } from 'react-md';
-
 import Domain from '../components/Domain';
-import keycloak from '../keycloak-config';
 
 import {
   CLIENT_TYPES,
@@ -69,26 +67,6 @@ export class ManageDomain extends Component {
 
   componentWillMount() {
     this.loadDomainList();
-  }
-
-  componentWillUpdate() {
-    let domains = this.state.domainList.filter(domain => {
-      return (
-        domain.realm !== 'master' &&
-        domain.id.length > 0 &&
-        domain.realm === domain.id
-      );
-    });
-
-    if (domains.length > 0) {
-      keycloak
-        .updateToken(60)
-        .success(() => {
-          sessionStorage.setItem('kctoken', keycloak.token);
-          this.loadDomainList();
-        })
-        .error(() => keycloak.logout());
-    }
   }
 
   loadDomainList() {
