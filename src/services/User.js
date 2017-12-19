@@ -22,7 +22,7 @@ class User {
     }
   }
 
-  static async assignRole(realm, userId, roleObj) {
+  static async assignRoles(realm, userId, roles) {
     const API_URL = `${process.env
       .REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
     const token = sessionStorage.kctoken;
@@ -32,12 +32,12 @@ class User {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + token,
       },
-      body: JSON.stringify(roleObj),
+      body: JSON.stringify(roles),
     });
     if (response.ok) {
       return response;
     } else {
-      throw new Error('Unable to assign role.');
+      throw new Error('Unable to assign role(s).');
     }
   }
 
@@ -190,7 +190,56 @@ class User {
     if (response.ok) {
       return response;
     } else {
-      throw new Error('Unable to unassign role.');
+      throw new Error('Unable to unassign role(s)');
+    }
+  }
+
+  static async assignTeams(realm, userId, teams) {
+    var response = '';
+    for (var i = 0; i < teams.length; i++) {
+      const API_URL = `${process.env
+        .REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/groups/${teams[
+        i
+      ].id}`;
+      const token = sessionStorage.kctoken;
+      response = await fetch(API_URL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + token,
+        },
+        body: JSON.stringify(teams),
+      });
+    }
+    if (response.ok) {
+      return response;
+    } else {
+      throw new Error('Unable to assign team(s)');
+    }
+  }
+
+  static async unAssignTeams(realm, userId, teams) {
+    var response = '';
+    for (var i = 0; i < teams.length; i++) {
+      const API_URL = `${process.env
+        .REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/groups/${teams[
+        i
+      ].id}`;
+      const token = sessionStorage.kctoken;
+      response = await fetch(API_URL, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + token,
+        },
+        body: JSON.stringify(teams),
+      });
+    }
+
+    if (response.ok) {
+      return response;
+    } else {
+      throw new Error('Unable to unassign team(s)');
     }
   }
 }

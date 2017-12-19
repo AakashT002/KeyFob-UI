@@ -17,7 +17,7 @@ const UserWidget = ({
   user,
   handleUserFieldChange,
   saveUser,
-  roles,
+  dropdownListValue,
   validateUserForm,
   isUserSaved,
   showAsSaved,
@@ -25,7 +25,8 @@ const UserWidget = ({
   UserFeedbackMessage,
   confirmUserDelete,
   inputRef,
-  handleRoleChange,
+  handleItemChange,
+  isMasterDomain,
 }) => {
   const renderMessageForUser = () => {
     if (!isErrorForUser) {
@@ -59,10 +60,22 @@ const UserWidget = ({
     }
   };
 
-  const isRoleSelected = roleId => {
+  const renderDropDownLabel = () => {
+    if (isMasterDomain) {
+      return user.realmRoles.length === 0
+        ? 'User Teams'
+        : user.realmRoles.length + ' Teams';
+    } else {
+      return user.realmRoles.length === 0
+        ? 'User Roles'
+        : user.realmRoles.length + ' Roles';
+    }
+  };
+
+  const isCheckboxSelected = id => {
     if (user.realmRoles.length > 0) {
       for (var r = 0; r < user.realmRoles.length; r++) {
-        if (user.realmRoles[r].id === roleId) {
+        if (user.realmRoles[r].id === id) {
           return true;
         }
       }
@@ -72,18 +85,17 @@ const UserWidget = ({
     }
   };
 
-  const roleChecklist = () => {
-    return roles.map((role, i) => {
+  const renderCheckBoxGroup = () => {
+    return dropdownListValue.map((item, i) => {
       return (
         <Checkbox
-          name={role.name}
+          name={item.name}
           id={i}
-          label={role.name}
-          value={role.id}
+          label={item.name}
+          value={item.id}
           key={i}
-          onChange={value =>
-            handleRoleChange(value, role.name, role.id, index, i)}
-          checked={isRoleSelected(role.id)}
+          onChange={value => handleItemChange(value, item.name, item.id, index)}
+          checked={isCheckboxSelected(item.id)}
         />
       );
     });
@@ -116,16 +128,14 @@ const UserWidget = ({
           />
         </div>
         <div className="user-attributes">
-          <SelectField
-            id="role-dropdown"
-            label={
-              user.realmRoles.length === 0
-                ? 'User Roles'
-                : user.realmRoles.length + ' Roles'
-            }
-            className="md-cell md-cell--bottom role-dropdown login-form__input third-fields"
-            menuItems={roleChecklist()}
-          />
+          {dropdownListValue.length > 0 ? (
+            <SelectField
+              id="userTab-dropdown"
+              label={renderDropDownLabel()}
+              className="md-cell md-cell--bottom role-dropdown login-form__input third-fields"
+              menuItems={renderCheckBoxGroup()}
+            />
+          ) : null}
           <TextField
             id="firstName"
             label="First Name"
@@ -182,8 +192,10 @@ UserWidget.propTypes = {
   UserFeedbackMessage: PropTypes.string,
   confirmUserDelete: PropTypes.func,
   inputRef: PropTypes.func,
-  handleRoleChange: PropTypes.func,
-  ischecked: PropTypes.bool,
+  handleItemChange: PropTypes.func,
+  isChecked: PropTypes.bool,
+  isMasterDomain: PropTypes.bool,
+  dropdownListValue: PropTypes.array,
 };
 
 export default UserWidget;

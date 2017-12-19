@@ -18,6 +18,8 @@ import {
   handleUserUpdate,
   handleUserRoleAssignment,
   unAssignUserRoles,
+  handleUserTeamAssignment,
+  unAssignUserTeams,
 } from '../store/addUser/action';
 
 import ClientForm from '../components/ClientForm';
@@ -682,6 +684,13 @@ class DomainPage extends Component {
 
   renderUsersTab() {
     const { users } = this.state;
+    var dropdownListValue = [];
+    if (!this.isMasterDomain()) {
+      dropdownListValue = this.state.roles;
+    } else {
+      dropdownListValue = this.state.teams;
+    }
+
     return (
       <Tab label="USERS" className="DomainPage__users-tab">
         {users.length !== 0 ? (
@@ -695,29 +704,18 @@ class DomainPage extends Component {
               removeUser={i => this.removeUser(i)}
               validateUserForm={this.validateUserForm.bind(this)}
               saveUser={() => this.onUserSave(i)}
-              roles={this.state.roles}
+              dropdownListValue={dropdownListValue}
               isUserSaved={this.state.users[i].isUserSaved}
               showAsSaved={this.state.users[i].showAsSaved}
               isErrorForUser={this.props.isErrorForUser}
               UserFeedbackMessage={this.props.UserFeedbackMessage}
-              handleRoleChange={(
-                value,
-                roleName,
-                roleId,
-                userIndex,
-                checkBoxIndex
-              ) =>
-                this.handleRoleChange(
-                  value,
-                  roleName,
-                  roleId,
-                  userIndex,
-                  checkBoxIndex
-                )}
+              handleItemChange={(itemChecked, itemName, itemId, userIndex) =>
+                this.handleItemChange(itemChecked, itemName, itemId, userIndex)}
               confirmUserDelete={this.handleDelete}
               inputRef={el => (this.userElement = el)}
-              ischecked={this.state.ischecked}
+              isChecked={this.state.isChecked}
               counter={this.state.counter}
+              isMasterDomain={this.isMasterDomain()}
             />
           ))
         ) : (
@@ -786,26 +784,26 @@ class DomainPage extends Component {
     });
   }
 
-  handleRoleChange(value, roleName, roleId, index) {
-    if (value) {
+  handleItemChange(itemChecked, itemName, itemId, index) {
+    if (itemChecked) {
       this.setState(() => {
         let existingUsers = this.state.users;
         let user = existingUsers[index];
         let found = false;
         if (user.realmRoles.length > 0) {
           for (var r = 0; r < user.realmRoles.length; r++) {
-            if (user.realmRoles[r].id === roleId) {
+            if (user.realmRoles[r].id === itemId) {
               found = true;
               break;
             }
           }
           if (!found) {
-            user.realmRoles.push({ id: roleId, name: roleName });
+            user.realmRoles.push({ id: itemId, name: itemName });
             user.isUserSaved = false;
             user.showAsSaved = false;
           }
         } else {
-          user.realmRoles.push({ id: roleId, name: roleName });
+          user.realmRoles.push({ id: itemId, name: itemName });
           user.isUserSaved = false;
           user.showAsSaved = false;
         }
@@ -820,7 +818,7 @@ class DomainPage extends Component {
         let _foundAt = -1;
         if (user.realmRoles.length > 0) {
           for (var r = 0; r < user.realmRoles.length; r++) {
-            if (user.realmRoles[r].id === roleId) {
+            if (user.realmRoles[r].id === itemId) {
               _foundAt = r;
               break;
             }
@@ -838,14 +836,19 @@ class DomainPage extends Component {
     }
   }
 
-  checkRoles(index) {
+  assignRolesOrTeamForUser(index) {
     const user = this.state.users[index];
     const realm = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
-
     if (user.realmRoles.length > 0) {
-      this.props.dispatch(
-        handleUserRoleAssignment(realm, user.id, user.realmRoles)
-      );
+      if (this.isMasterDomain()) {
+        this.props.dispatch(
+          handleUserTeamAssignment(realm, user.id, user.realmRoles)
+        );
+      } else {
+        this.props.dispatch(
+          handleUserRoleAssignment(realm, user.id, user.realmRoles)
+        );
+      }
     }
   }
 
@@ -895,17 +898,6 @@ class DomainPage extends Component {
     }
   }
 
-  // checkDomains(index) {
-  //   const client = this.state.clients[index];
-  //   const realm = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
-
-  //   if (client.domains.length > 0) {
-  //     this.props.dispatch(
-  //       handleUserRoleAssignment(realm, client.id, client.domains)
-  //     );
-  //   }
-  // }
-
   onUserSave(index) {
     const realm = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
     var userObject = Object.assign({}, this.state.users[index]);
@@ -915,37 +907,44 @@ class DomainPage extends Component {
     delete userObject['id'];
     delete userObject['showAsSaved'];
     delete userObject['realmRoles'];
+
     if (id !== undefined) {
       if (realmRoles.length >= 0) {
-        this.props
-          .dispatch(unAssignUserRoles(realm, id, this.state.roles))
-          .then(() => {
-            this.props
-              .dispatch(handleUserUpdate(realm, userObject, id))
-              .then(() => {
-                let users = this.state.users;
-                let currentuser = users[index];
-                currentuser.isUserSaved = true;
-                currentuser.showAsSaved = true;
-                if (this.props.isUserSaved) {
-                  this.checkRoles(index);
-                }
-                this.setState({ users });
-              });
-          });
-      } else {
-        this.props
-          .dispatch(handleUserUpdate(realm, userObject, id))
-          .then(() => {
-            let users = this.state.users;
-            let currentuser = users[index];
-            currentuser.isUserSaved = true;
-            currentuser.showAsSaved = true;
-            if (this.props.isUserSaved) {
-              this.checkRoles(index);
-            }
-            this.setState({ users });
-          });
+        if (!this.isMasterDomain()) {
+          this.props
+            .dispatch(unAssignUserRoles(realm, id, this.state.roles))
+            .then(() => {
+              this.props
+                .dispatch(handleUserUpdate(realm, userObject, id))
+                .then(() => {
+                  let users = this.state.users;
+                  let currentuser = users[index];
+                  currentuser.isUserSaved = true;
+                  currentuser.showAsSaved = true;
+                  if (this.props.isUserSaved) {
+                    this.assignRolesOrTeamForUser(index);
+                  }
+                  this.setState({ users });
+                });
+            });
+        } else {
+          this.props
+            .dispatch(unAssignUserTeams(realm, id, this.state.teams))
+            .then(() => {
+              this.props
+                .dispatch(handleUserUpdate(realm, userObject, id))
+                .then(() => {
+                  let users = this.state.users;
+                  let currentuser = users[index];
+                  currentuser.isUserSaved = true;
+                  currentuser.showAsSaved = true;
+                  if (this.props.isUserSaved) {
+                    this.assignRolesOrTeamForUser(index);
+                  }
+                  this.setState({ users });
+                });
+            });
+        }
       }
     } else {
       this.props.dispatch(handleUserCreation(realm, userObject)).then(() => {
@@ -957,7 +956,7 @@ class DomainPage extends Component {
           currentuser.id = this.props.userId;
         }
         if (this.props.isUserSaved) {
-          this.checkRoles(index);
+          this.assignRolesOrTeamForUser(index);
         }
         this.setState({ users });
       });
@@ -1018,7 +1017,7 @@ class DomainPage extends Component {
   render() {
     const { activeTab } = this.state;
     let applicableTabs = null;
-    if (this.state.currentdomainName === 'master') {
+    if (this.isMasterDomain()) {
       applicableTabs = this.renderMasterDomainTabs();
     } else {
       applicableTabs = this.renderApplicationTabs();
@@ -1061,7 +1060,7 @@ class DomainPage extends Component {
           </div>
         </Card>
         <DialogContainer
-          id="deleteModal-roles"
+          id="deleteModal"
           dialogClassName="deleteModal-modal"
           visible={this.state.deleteObj.deleteModalVisible}
           title={this.determineTitle()}

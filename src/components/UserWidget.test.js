@@ -15,6 +15,7 @@ describe('Component: UserWidget', () => {
   const roles = [];
   const wrapper = shallow(
     <UserWidget
+      dropdownListValue={[]}
       user={user}
       roles={roles}
       validateUserForm={spy}

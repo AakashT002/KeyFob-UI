@@ -143,6 +143,39 @@ export const addUser = createReducer(initialUsersState, {
       UserFeedbackMessage: action.error.message,
     };
   },
+
+  [ActionTypes.ASSIGN_USER_TEAM_REQUEST](state) {
+    return { ...state, requesting: true };
+  },
+
+  [ActionTypes.ASSIGN_USER_TEAM_SUCCESS](state) {
+    return { ...state, requesting: false };
+  },
+
+  [ActionTypes.ASSIGN_USER_TEAM_FAILURE](state, action) {
+    return {
+      ...state,
+      requesting: false,
+      UserFeedbackMessage: action.error.message,
+    };
+  },
+
+  [ActionTypes.UNASSIGN_USER_TEAMS_REQUEST](state) {
+    return { ...state, requesting: true };
+  },
+
+  [ActionTypes.UNASSIGN_USER_TEAMS_SUCCESS](state) {
+    return { ...state, requesting: false };
+  },
+
+  [ActionTypes.UNASSIGN_USER_TEAMS_FAILURE](state, action) {
+    return {
+      ...state,
+      requesting: false,
+      UserFeedbackMessage: action.error.message,
+    };
+  },
+
 });
 
 export default addUser;

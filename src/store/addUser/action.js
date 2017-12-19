@@ -16,7 +16,7 @@ export const handleUserCreation = (realm, userObj) => ({
   },
 });
 
-export const handleUserRoleAssignment = (realm, userId, roleObj) => ({
+export const handleUserRoleAssignment = (realm, userId, roles) => ({
   types: [
     ActionTypes.ASSIGN_USER_ROLE_REQUEST,
     ActionTypes.ASSIGN_USER_ROLE_SUCCESS,
@@ -24,7 +24,7 @@ export const handleUserRoleAssignment = (realm, userId, roleObj) => ({
   ],
   callAPI: async () => {
     try {
-      return await User.assignRole(realm, userId, roleObj);
+      return await User.assignRoles(realm, userId, roles);
     } catch (error) {
       throw new Error(error.message);
     }
@@ -104,6 +104,36 @@ export const unAssignUserRoles = (realm, userId, roleObj) => ({
   callAPI: async () => {
     try {
       return await User.unAssignRoles(realm, userId, roleObj);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+});
+
+export const handleUserTeamAssignment = (realm, userId, teams) => ({
+  types: [
+    ActionTypes.ASSIGN_USER_TEAM_REQUEST,
+    ActionTypes.ASSIGN_USER_TEAM_SUCCESS,
+    ActionTypes.ASSIGN_USER_TEAM_FAILURE,
+  ],
+  callAPI: async () => {
+    try {
+      return await User.assignTeams(realm, userId, teams);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+});
+
+export const unAssignUserTeams = (realm, userId, teams) => ({
+  types: [
+    ActionTypes.UNASSIGN_USER_TEAMS_REQUEST,
+    ActionTypes.UNASSIGN_USER_TEAMS_SUCCESS,
+    ActionTypes.UNASSIGN_USER_TEAMS_FAILURE,
+  ],
+  callAPI: async () => {
+    try {
+      return await User.unAssignTeams(realm, userId, teams);
     } catch (error) {
       throw new Error(error.message);
     }
