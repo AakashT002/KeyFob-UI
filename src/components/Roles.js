@@ -24,7 +24,7 @@ const Roles = ({
               disabled={disableButton === undefined || disableButton === true}
               id="role"
               required
-              label={isDirty ? 'New Role Name' : ''}
+              placeholder="New Role Name"
               value={roleName}
               ref={index === 0 ? inputRef : null}
               onChange={value => handleChange(value, index)}

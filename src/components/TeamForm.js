@@ -24,6 +24,8 @@ const TeamForm = ({
   domains,
   handleDomainChange,
   confirmTeamDelete,
+  mappedDomains,
+  inputRef,
 }) => {
   const renderMessageForTeam = () => {
     if (!isErrorForTeam) {
@@ -55,19 +57,6 @@ const TeamForm = ({
     }
   };
 
-  const isDomainSelected = domainId => {
-    if (team.domains.length > 0) {
-      for (var r = 0; r < team.domains.length; r++) {
-        if (team.domains[r].id === domainId) {
-          return true;
-        }
-      }
-      return false;
-    } else {
-      return false;
-    }
-  };
-
   const domainList = () => {
     return domains.map((domain, i) => {
       return (
@@ -79,7 +68,7 @@ const TeamForm = ({
           key={i}
           onChange={value =>
             handleDomainChange(value, domain.clientId, domain.id, index)}
-          checked={isDomainSelected(domain.id)}
+          checked={!!mappedDomains && domain.clientId in mappedDomains}
         />
       );
     });
@@ -94,16 +83,17 @@ const TeamForm = ({
               id="team"
               required
               className="md-cell  TeamForm__team-name"
-              label={team.id && team.id.length > 0 ? '' : 'New Team Name'}
+              placeholder="New Team Name"
               value={team.name}
               onChange={value => handleTeamChange(value, index)}
+              ref={team.id === undefined ? inputRef : null}
             />
             <SelectField
               id="domain-dropdown"
               label={
-                team.domains.length === 0
+                Object.keys(team.mappedDomains).length === 0
                   ? 'Assign Domain(s)'
-                  : team.domains.length + ' Domains'
+                  : Object.keys(team.mappedDomains).length + ' Domains'
               }
               required
               className="md-cell TeamForm__select"
@@ -147,6 +137,8 @@ TeamForm.propTypes = {
   onTeamSave: PropTypes.func,
   handleDomainChange: PropTypes.func,
   domains: PropTypes.array,
+  mappedDomains: PropTypes.object,
+  inputRef: PropTypes.func,
 };
 
 export default TeamForm;

@@ -17,6 +17,24 @@ class Teams {
     }
   }
 
+  static async getTeamDomains(groupId) {
+    const token = sessionStorage.kctoken;
+    const API_URL = `${process.env
+      .REACT_APP_AUTH_URL}/admin/realms/master/groups/${groupId}`;
+    const response = await fetch(API_URL, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      throw new Error('Team domains could not be fetched.');
+    }
+  }
+
   static async createTeam(teamObject) {
     const token = sessionStorage.kctoken;
     const response = await fetch(
@@ -80,6 +98,62 @@ class Teams {
       return id;
     } else {
       throw new Error('Team cannot be removed.');
+    }
+  }
+
+  static async assignTeamDomain(realm, teamId, teamDomainId, teamDomainsArray) {
+    const API_URL = `${process.env
+      .REACT_APP_AUTH_URL}/admin/realms/${realm}/groups/${teamId}/role-mappings/clients/${teamDomainId}`;
+    const token = sessionStorage.kctoken;
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token,
+      },
+      body: JSON.stringify(teamDomainsArray),
+    });
+    if (response.ok) {
+      return response;
+    } else {
+      throw new Error('Unable to assign domain role.');
+    }
+  }
+
+  static async getAvailableRolesForTeamDomain(realm, teamId, teamDomainId) {
+    const API_URL = `${process.env
+      .REACT_APP_AUTH_URL}/admin/realms/${realm}/groups/${teamId}/role-mappings/clients/${teamDomainId}/available`;
+    const token = sessionStorage.kctoken;
+    const response = await fetch(API_URL, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token,
+      },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      throw new Error('Unable to assign domain role.');
+    }
+  }
+
+  static async unAssignTeamDomain(realm, teamId, clientId) {
+    const API_URL = `${process.env
+      .REACT_APP_AUTH_URL}/admin/realms/${realm}/groups/${teamId}/role-mappings/clients/${clientId}`;
+    const token = sessionStorage.kctoken;
+    const response = await fetch(API_URL, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token,
+      },
+    });
+    if (response.ok) {
+      return response;
+    } else {
+      throw new Error('Unable to unassign domain role.');
     }
   }
 }

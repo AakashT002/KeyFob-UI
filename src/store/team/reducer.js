@@ -8,6 +8,8 @@ const initialTeamsState = {
   isError: false,
   isTeamSaved: false,
   teamId: '',
+  availableRolesForTeamDomain: [],
+  mappedDomains: {},
 };
 
 export const team = createReducer(initialTeamsState, {
@@ -43,6 +45,19 @@ export const team = createReducer(initialTeamsState, {
   [ActionTypes.FETCH_TEAMS_FAILURE](state) {
     return { ...state, requesting: false };
   },
+  [ActionTypes.FETCH_TEAM_DOMAIN_REQUEST](state) {
+    return { ...state, requesting: true };
+  },
+  [ActionTypes.FETCH_TEAM_DOMAIN_SUCCESS](state, action) {
+    return {
+      ...state,
+      mappedDomains: action.response.clientRoles,
+      requesting: false,
+    };
+  },
+  [ActionTypes.FETCH_TEAM_DOMAIN_FAILURE](state) {
+    return { ...state, requesting: false };
+  },
   [ActionTypes.UPDATE_TEAM_REQUEST](state) {
     return { ...state, isError: false };
   },
@@ -73,6 +88,19 @@ export const team = createReducer(initialTeamsState, {
     return { ...state, requesting: true };
   },
   [ActionTypes.DELETE_TEAM_FAILURE](state) {
+    return { ...state, requesting: false };
+  },
+  [ActionTypes.GET_AVL_ROLES_FOR_TEAM_DOMAIN_REQUEST](state) {
+    return { ...state, requesting: true };
+  },
+  [ActionTypes.GET_AVL_ROLES_FOR_TEAM_DOMAIN_SUCCESS](state, action) {
+    return {
+      ...state,
+      availableRolesForTeamDomain: action.response,
+      requesting: false,
+    };
+  },
+  [ActionTypes.GET_AVL_ROLES_FOR_TEAM_DOMAIN_FAILURE](state) {
     return { ...state, requesting: false };
   },
 });

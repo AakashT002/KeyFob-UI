@@ -7,6 +7,12 @@
   background-color: $grey-white;
   padding-bottom: 20px;
 
+  .md-text-field {
+    &::placeholder {
+      color: $red;
+    }
+  }
+
   .TeamForm__team-name {
     width: 500px;
   }
@@ -14,6 +20,10 @@
   .TeamForm__select {
     margin-left: 14px;
     margin-top: -3px;
+
+    .md-list {
+      max-height: 120px;
+    }
   }
 
   .TeamForm__forms-section {
@@ -62,16 +72,12 @@
 		  font-size: 1.5em;
 		}
 			
-		.md-divider {
-			background-color: $black  ;
-		} 
-
     .md-text--theme-secondary {
       color: $light-pink;
     }
 
     .md-text--error {
-      color: $light-pink;
+      color: $black;
     }
   }
 

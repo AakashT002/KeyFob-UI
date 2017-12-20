@@ -36,10 +36,14 @@ import {
 
 import {
   loadTeams,
+  loadTeamDomains,
   saveTeam,
   updateTeam,
   addTeam,
   handleTeamDeletion,
+  handleTeamDomainAssignment,
+  getAvailableRolesForTeamDomain,
+  unAssignTeamDomain,
 } from '../store/team/action';
 
 import {
@@ -58,6 +62,7 @@ import {
   DELETE_CLIENT_MESSAGE,
   DELETE_USER_MESSAGE,
   DELETE_TEAM_MESSAGE,
+  APPLICABLE_TEAM_DOMAINS_ROLES,
 } from '../utils/constants';
 
 import Roles from '../components/Roles';
@@ -80,7 +85,6 @@ class DomainPage extends Component {
         selectedIndex: -1,
         deleteModalVisible: false,
       },
-      isChecked: false,
     };
 
     this.handleTabChange = this.handleTabChange.bind(this);
@@ -108,12 +112,16 @@ class DomainPage extends Component {
         ).then(() => {
           const { userRoles } = this.props;
           userRoles.forEach(_userRole => {
-            if (!IGNORED_ROLES.includes(_userRole.name.toString())) {
-              let role = {
-                id: _userRole.id,
-                name: _userRole.name,
-              };
+            let role = {
+              id: _userRole.id,
+              name: _userRole.name,
+            };
+            if (this.isMasterDomain()) {
               assignedUserRoles.push(role);
+            } else {
+              if (!IGNORED_ROLES.includes(_userRole.name.toString())) {
+                assignedUserRoles.push(role);
+              }
             }
           });
           let userObj = {
@@ -216,34 +224,41 @@ class DomainPage extends Component {
     dispatch(loadTeams(this.state.currentdomainName)).then(() => {
       let { teamList } = this.props;
       let teams = [];
-      for (var j = 0; j < teamList.length; j++) {
-        let teamObj = {
-          id: teamList[j].id,
-          name: teamList[j].name,
-          showAsSaved: false,
-          isTeamSaved: true,
-          domains: [],
-        };
-        teams = teams.concat([teamObj]);
-      }
-      this.setState({ teams });
+      teamList.forEach(team => {
+        dispatch(loadTeamDomains(team.id)).then(() => {
+          let teamObj = {
+            id: team.id,
+            name: team.name,
+            showAsSaved: false,
+            isTeamSaved: true,
+            mappedDomains: this.props.mappedDomains,
+          };
+          teams = teams.concat([teamObj]);
+          this.setState({ teams });
+        });
+      });
     });
   }
 
   componentDidUpdate() {
-    const { activeTab, focusOnNewElement } = this.state;
+    const { focusOnNewElement } = this.state;
 
-    if (this.clientElement && activeTab === 0 && focusOnNewElement) {
+    if (this.clientElement && this._isClientsTab() && focusOnNewElement) {
       this.clientElement.focus();
       this.setState({ focusOnNewElement: false });
     }
 
-    if (this.userElement && activeTab === 2 && focusOnNewElement) {
+    if (this.teamElement && this._isTeamsTab() && focusOnNewElement) {
+      this.teamElement.focus();
+      this.setState({ focusOnNewElement: false });
+    }
+
+    if (this.userElement && this._isUsersTab() && focusOnNewElement) {
       this.userElement.focus();
       this.setState({ focusOnNewElement: false });
     }
 
-    if (this.roleElement && activeTab === 1 && focusOnNewElement) {
+    if (this.roleElement && this._isRolesTab() && focusOnNewElement) {
       this.roleElement.focus();
       this.setState({ focusOnNewElement: false });
     }
@@ -315,11 +330,13 @@ class DomainPage extends Component {
         this.setState({ roles });
       }
     } else if (this._isUsersTab()) {
-      this.props
-        .dispatch(addBlankUser(this.state.currentdomainName, users))
-        .then(() => {
-          this.setState({ users: this.props.users });
-        });
+      if (users.length === 0 || users[0].id !== undefined) {
+        this.props
+          .dispatch(addBlankUser(this.state.currentdomainName, users))
+          .then(() => {
+            this.setState({ users: this.props.users });
+          });
+      }
     } else if (this._isTeamsTab()) {
       if (teams.length === 0 || teams[0].id !== undefined) {
         this.props.dispatch(addTeam()).then(() => {
@@ -328,6 +345,7 @@ class DomainPage extends Component {
             showAsSaved: false,
             isTeamSaved: this.props.isTeamSaved,
             domains: [],
+            mappedDomains: [],
           };
           teams.splice(0, 0, team);
           teams.forEach(team => {
@@ -599,9 +617,11 @@ class DomainPage extends Component {
               isErrorForTeam={this.props.isErrorForTeam}
               teamFeedbackMessage={this.props.teamFeedbackMessage}
               confirmTeamDelete={this.handleDelete}
+              mappedDomains={team.mappedDomains}
               handleDomainChange={(value, domainName, domainId, userIndex) =>
                 this.handleDomainChange(value, domainName, domainId, userIndex)}
               domains={this.state.clients}
+              inputRef={el => (this.teamElement = el)}
             />
           ))
         ) : (
@@ -667,7 +687,6 @@ class DomainPage extends Component {
               isDirty={role.isDirty}
               handleChange={this.handleChange}
               onRoleSave={this.onRoleSave}
-              focusOnText={this.focusOnText}
               blurOnText={this.blurOnText}
               inputRef={el => (this.roleElement = el)}
               confirmRoleDelete={this.handleDelete}
@@ -713,8 +732,6 @@ class DomainPage extends Component {
                 this.handleItemChange(itemChecked, itemName, itemId, userIndex)}
               confirmUserDelete={this.handleDelete}
               inputRef={el => (this.userElement = el)}
-              isChecked={this.state.isChecked}
-              counter={this.state.counter}
               isMasterDomain={this.isMasterDomain()}
             />
           ))
@@ -858,19 +875,18 @@ class DomainPage extends Component {
         let existingTeams = this.state.teams;
         let team = existingTeams[index];
         let found = false;
-        if (team.domains.length > 0) {
-          for (var r = 0; r < team.domains.length; r++) {
-            if (team.domains[r].id === domainId) {
-              found = true;
-              break;
-            }
+
+        Object.entries(team.mappedDomains).forEach(([key, value]) => {
+          if (key === domainName && value !== undefined) {
+            found = true;
           }
-          if (!found) {
-            team.domains.push({ id: domainId, name: domainName });
-          }
-        } else {
-          team.domains.push({ id: domainId, name: domainName });
+        });
+        if (!found) {
+          team.mappedDomains[domainName] = domainId;
+          team.isTeamSaved = false;
+          team.showAsSaved = false;
         }
+
         return {
           teams: existingTeams,
         };
@@ -879,17 +895,16 @@ class DomainPage extends Component {
       this.setState(() => {
         let existingTeams = this.state.teams;
         let team = existingTeams[index];
-        let _foundAt = -1;
-        if (team.domains.length > 0) {
-          for (var r = 0; r < team.domains.length; r++) {
-            if (team.domains[r].id === domainId) {
-              _foundAt = r;
-              break;
-            }
+        let found = false;
+        Object.entries(team.mappedDomains).forEach(([key, value]) => {
+          if (key === domainName && value !== undefined) {
+            found = true;
           }
-          if (_foundAt >= 0) {
-            team.domains.splice(_foundAt, 1);
-          }
+        });
+        if (found) {
+          delete team.mappedDomains[domainName];
+          team.isTeamSaved = false;
+          team.showAsSaved = false;
         }
         return {
           teams: existingTeams,
@@ -902,49 +917,46 @@ class DomainPage extends Component {
     const realm = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
     var userObject = Object.assign({}, this.state.users[index]);
     var id = userObject.id;
-    var realmRoles = userObject.realmRoles;
     delete userObject['isUserSaved'];
     delete userObject['id'];
     delete userObject['showAsSaved'];
     delete userObject['realmRoles'];
 
     if (id !== undefined) {
-      if (realmRoles.length >= 0) {
-        if (!this.isMasterDomain()) {
-          this.props
-            .dispatch(unAssignUserRoles(realm, id, this.state.roles))
-            .then(() => {
-              this.props
-                .dispatch(handleUserUpdate(realm, userObject, id))
-                .then(() => {
-                  let users = this.state.users;
-                  let currentuser = users[index];
-                  currentuser.isUserSaved = true;
-                  currentuser.showAsSaved = true;
-                  if (this.props.isUserSaved) {
-                    this.assignRolesOrTeamForUser(index);
-                  }
-                  this.setState({ users });
-                });
-            });
-        } else {
-          this.props
-            .dispatch(unAssignUserTeams(realm, id, this.state.teams))
-            .then(() => {
-              this.props
-                .dispatch(handleUserUpdate(realm, userObject, id))
-                .then(() => {
-                  let users = this.state.users;
-                  let currentuser = users[index];
-                  currentuser.isUserSaved = true;
-                  currentuser.showAsSaved = true;
-                  if (this.props.isUserSaved) {
-                    this.assignRolesOrTeamForUser(index);
-                  }
-                  this.setState({ users });
-                });
-            });
-        }
+      if (!this.isMasterDomain()) {
+        this.props
+          .dispatch(unAssignUserRoles(realm, id, this.state.roles))
+          .then(() => {
+            this.props
+              .dispatch(handleUserUpdate(realm, userObject, id))
+              .then(() => {
+                let users = this.state.users;
+                let currentuser = users[index];
+                currentuser.isUserSaved = true;
+                currentuser.showAsSaved = true;
+                if (this.props.isUserSaved) {
+                  this.assignRolesOrTeamForUser(index);
+                }
+                this.setState({ users });
+              });
+          });
+      } else {
+        this.props
+          .dispatch(unAssignUserTeams(realm, id, this.state.teams))
+          .then(() => {
+            this.props
+              .dispatch(handleUserUpdate(realm, userObject, id))
+              .then(() => {
+                let users = this.state.users;
+                let currentuser = users[index];
+                currentuser.isUserSaved = true;
+                currentuser.showAsSaved = true;
+                if (this.props.isUserSaved) {
+                  this.assignRolesOrTeamForUser(index);
+                }
+                this.setState({ users });
+              });
+          });
       }
     } else {
       this.props.dispatch(handleUserCreation(realm, userObject)).then(() => {
@@ -992,13 +1004,25 @@ class DomainPage extends Component {
     delete teamObject['id'];
     delete teamObject['showAsSaved'];
     delete teamObject['domains'];
+    delete teamObject['mappedDomains'];
     if (id !== undefined) {
-      this.props.dispatch(updateTeam(teamObject, id)).then(() => {
-        let teams = this.state.teams;
-        let currentTeam = teams[index];
-        currentTeam.isTeamSaved = true;
-        currentTeam.showAsSaved = true;
-        this.setState({ teams });
+      this.state.clients.forEach(_clients => {
+        this.props
+          .dispatch(
+            unAssignTeamDomain(this.state.currentdomainName, id, _clients.id)
+          )
+          .then(() => {
+            this.props.dispatch(updateTeam(teamObject, id)).then(() => {
+              let teams = this.state.teams;
+              let currentTeam = teams[index];
+              currentTeam.isTeamSaved = true;
+              currentTeam.showAsSaved = true;
+              if (this.props.isTeamSaved) {
+                this.checkTeams(index);
+              }
+              this.setState({ teams });
+            });
+          });
       });
     } else {
       this.props.dispatch(saveTeam(teamObject)).then(() => {
@@ -1009,9 +1033,47 @@ class DomainPage extends Component {
         if (!this.props.isErrorForTeam) {
           currentTeam.id = this.props.teamId;
         }
+        if (this.props.isTeamSaved) {
+          this.checkTeams(index);
+        }
         this.setState({ teams });
       });
     }
+  }
+
+  checkTeams(index) {
+    const team = this.state.teams[index];
+    const realm = sessionStorage.getItem(CURRENT_DOMAIN_NAME);
+
+    Object.values(team.mappedDomains).forEach(domainId => {
+      this.props
+        .dispatch(getAvailableRolesForTeamDomain(realm, team.id, domainId))
+        .then(() => {
+          const { availableRolesForTeamDomain } = this.props;
+          let applicableTeamDomainRoles = [];
+          availableRolesForTeamDomain.forEach(_availableRole => {
+            if (
+              APPLICABLE_TEAM_DOMAINS_ROLES.includes(
+                _availableRole.name.toString()
+              )
+            ) {
+              let teamDomainRole = {
+                id: _availableRole.id,
+                name: _availableRole.name,
+              };
+              applicableTeamDomainRoles.push(teamDomainRole);
+            }
+          });
+          this.props.dispatch(
+            handleTeamDomainAssignment(
+              realm,
+              team.id,
+              domainId,
+              applicableTeamDomainRoles
+            )
+          );
+        });
+    });
   }
 
   render() {
@@ -1148,6 +1210,8 @@ DomainPage.propTypes = {
   teamFeedbackMessage: PropTypes.string,
   teamId: PropTypes.string,
   userRoles: PropTypes.array,
+  availableRolesForTeamDomain: PropTypes.array,
+  mappedDomains: PropTypes.object,
 };
 
 function mapStateToProps(state) {
@@ -1175,6 +1239,8 @@ function mapStateToProps(state) {
     isErrorForTeam: state.team.isError,
     teamId: state.team.teamId,
     userRoles: state.users.userRoles,
+    availableRolesForTeamDomain: state.team.availableRolesForTeamDomain,
+    mappedDomains: state.team.mappedDomains,
   };
 }
 

@@ -17,6 +17,22 @@ export const loadTeams = domainName => ({
   type: '',
 });
 
+export const loadTeamDomains = groupId => ({
+  types: [
+    ActionTypes.FETCH_TEAM_DOMAIN_REQUEST,
+    ActionTypes.FETCH_TEAM_DOMAIN_SUCCESS,
+    ActionTypes.FETCH_TEAM_DOMAIN_FAILURE,
+  ],
+  callAPI: async () => {
+    try {
+      return await Teams.getTeamDomains(groupId);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+  type: '',
+});
+
 export const saveTeam = teamObject => ({
   types: [
     ActionTypes.CREATE_TEAM_REQUEST,
@@ -67,4 +83,67 @@ export const handleTeamDeletion = (currentdomainName, id) => ({
     }
   },
   type: '',
+});
+
+export const handleTeamDomainAssignment = (
+  realm,
+  teamId,
+  teamDomainId,
+  teamDomainsArray
+) => ({
+  types: [
+    ActionTypes.ASSIGN_TEAM_DOMAIN_REQUEST,
+    ActionTypes.ASSIGN_TEAM_DOMAIN_SUCCESS,
+    ActionTypes.ASSIGN_TEAM_DOMAIN_FAILURE,
+  ],
+  callAPI: async () => {
+    try {
+      return await Teams.assignTeamDomain(
+        realm,
+        teamId,
+        teamDomainId,
+        teamDomainsArray
+      );
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+});
+
+export const getAvailableRolesForTeamDomain = (
+  realm,
+  teamId,
+  teamDomainId
+) => ({
+  types: [
+    ActionTypes.GET_AVL_ROLES_FOR_TEAM_DOMAIN_REQUEST,
+    ActionTypes.GET_AVL_ROLES_FOR_TEAM_DOMAIN_SUCCESS,
+    ActionTypes.GET_AVL_ROLES_FOR_TEAM_DOMAIN_FAILURE,
+  ],
+  callAPI: async () => {
+    try {
+      return await Teams.getAvailableRolesForTeamDomain(
+        realm,
+        teamId,
+        teamDomainId
+      );
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+});
+
+export const unAssignTeamDomain = (realm, id, clientId) => ({
+  types: [
+    ActionTypes.UNASSIGN_TEAM_DOMAIN_REQUEST,
+    ActionTypes.UNASSIGN_TEAM_DOMAIN_SUCCESS,
+    ActionTypes.UNASSIGN_TEAM_DOMAIN_FAILURE,
+  ],
+  callAPI: async () => {
+    try {
+      return await Teams.unAssignTeamDomain(realm, id, clientId);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
 });

@@ -87,7 +87,7 @@ const UserWidget = ({
 
   const renderCheckBoxGroup = () => {
     return dropdownListValue.map((item, i) => {
-      return (
+      return item.id && item.id.length > 0 ? (
         <Checkbox
           name={item.name}
           id={i}
@@ -97,7 +97,7 @@ const UserWidget = ({
           onChange={value => handleItemChange(value, item.name, item.id, index)}
           checked={isCheckboxSelected(item.id)}
         />
-      );
+      ) : null;
     });
   };
 
@@ -115,7 +115,7 @@ const UserWidget = ({
             className="md-cell md-cell--bottom login-form__input half-fields"
             inputClassName="font_size__normal"
             onChange={value => handleUserFieldChange('username', value)}
-            ref={index === 0 && user.username !== undefined ? inputRef : null}
+            ref={index === 0 ? inputRef : null}
           />
           <TextField
             id="email"
@@ -193,7 +193,6 @@ UserWidget.propTypes = {
   confirmUserDelete: PropTypes.func,
   inputRef: PropTypes.func,
   handleItemChange: PropTypes.func,
-  isChecked: PropTypes.bool,
   isMasterDomain: PropTypes.bool,
   dropdownListValue: PropTypes.array,
 };

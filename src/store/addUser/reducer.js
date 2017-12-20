@@ -175,7 +175,6 @@ export const addUser = createReducer(initialUsersState, {
       UserFeedbackMessage: action.error.message,
     };
   },
-
 });
 
 export default addUser;
