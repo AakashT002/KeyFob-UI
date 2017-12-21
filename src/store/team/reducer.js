@@ -39,7 +39,7 @@ export const team = createReducer(initialTeamsState, {
     return { ...state, requesting: true };
   },
   [ActionTypes.FETCH_TEAMS_SUCCESS](state, action) {
-    return { ...state, teamList: action.response };
+    return { ...state, teamList: action.response, requesting: false };
   },
   [ActionTypes.FETCH_TEAMS_FAILURE](state) {
     return { ...state, requesting: false };
@@ -51,6 +51,7 @@ export const team = createReducer(initialTeamsState, {
     return {
       ...state,
       mappedDomains: action.response.clientRoles,
+      requesting: false,
     };
   },
   [ActionTypes.FETCH_TEAM_DOMAIN_FAILURE](state) {

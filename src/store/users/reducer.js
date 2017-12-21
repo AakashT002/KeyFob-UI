@@ -11,7 +11,7 @@ export const users = createReducer(initialUsersState, {
     return { ...state, requesting: true };
   },
   [ActionTypes.FETCH_USERS_SUCCESS](state, action) {
-    return { ...state, users: action.response };
+    return { ...state, users: action.response, requesting: false };
   },
   [ActionTypes.FETCH_USERS_FAILURE](state) {
     return { ...state, requesting: false };
@@ -20,7 +20,7 @@ export const users = createReducer(initialUsersState, {
     return { ...state };
   },
   [ActionTypes.ADD_BLANK_USER_SUCCESS](state, action) {
-    return { ...state, users: action.response };
+    return { ...state, users: action.response, requesting: false };
   },
   [ActionTypes.ADD_BLANK_USER_FAILURE](state) {
     return { ...state, requesting: false };

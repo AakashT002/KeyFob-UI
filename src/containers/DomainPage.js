@@ -151,7 +151,7 @@ class DomainPage extends Component {
           };
           existingUsers = existingUsers.concat([userObj]);
           this.setState({ users: existingUsers });
-          this.props.dispatch(stopUserSpinner());
+          dispatch(stopUserSpinner());
         });
       });
     });
@@ -244,7 +244,7 @@ class DomainPage extends Component {
           };
           teams = teams.concat([teamObj]);
           this.setState({ teams });
-          this.props.dispatch(stopTeamSpinner());
+          dispatch(stopTeamSpinner());
         });
       });
     });
