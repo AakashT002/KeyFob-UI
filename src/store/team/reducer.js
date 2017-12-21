@@ -14,12 +14,11 @@ const initialTeamsState = {
 
 export const team = createReducer(initialTeamsState, {
   [ActionTypes.CREATE_TEAM_REQUEST](state) {
-    return { ...state, requesting: true, isError: false };
+    return { ...state, isError: false };
   },
   [ActionTypes.CREATE_TEAM_SUCCESS](state, action) {
     return {
       ...state,
-      requesting: false,
       message: 'Saved',
       isError: false,
       saving: true,
@@ -40,7 +39,7 @@ export const team = createReducer(initialTeamsState, {
     return { ...state, requesting: true };
   },
   [ActionTypes.FETCH_TEAMS_SUCCESS](state, action) {
-    return { ...state, teamList: action.response, requesting: false };
+    return { ...state, teamList: action.response };
   },
   [ActionTypes.FETCH_TEAMS_FAILURE](state) {
     return { ...state, requesting: false };
@@ -52,7 +51,6 @@ export const team = createReducer(initialTeamsState, {
     return {
       ...state,
       mappedDomains: action.response.clientRoles,
-      requesting: false,
     };
   },
   [ActionTypes.FETCH_TEAM_DOMAIN_FAILURE](state) {
@@ -64,7 +62,6 @@ export const team = createReducer(initialTeamsState, {
   [ActionTypes.UPDATE_TEAM_SUCCESS](state) {
     return {
       ...state,
-      requesting: false,
       isTeamSaved: true,
       isError: false,
       message: 'Saved',
@@ -82,25 +79,27 @@ export const team = createReducer(initialTeamsState, {
     return { ...state, isTeamSaved: false };
   },
   [ActionTypes.DELETE_TEAM_REQUEST](state) {
-    return { ...state, requesting: true };
+    return { ...state };
   },
   [ActionTypes.DELETE_TEAM_SUCCESS](state) {
-    return { ...state, requesting: true };
+    return { ...state };
   },
   [ActionTypes.DELETE_TEAM_FAILURE](state) {
     return { ...state, requesting: false };
   },
   [ActionTypes.GET_AVL_ROLES_FOR_TEAM_DOMAIN_REQUEST](state) {
-    return { ...state, requesting: true };
+    return { ...state };
   },
   [ActionTypes.GET_AVL_ROLES_FOR_TEAM_DOMAIN_SUCCESS](state, action) {
     return {
       ...state,
       availableRolesForTeamDomain: action.response,
-      requesting: false,
     };
   },
   [ActionTypes.GET_AVL_ROLES_FOR_TEAM_DOMAIN_FAILURE](state) {
+    return { ...state, requesting: false };
+  },
+  [ActionTypes.STOP_TEAM_SPINNER](state) {
     return { ...state, requesting: false };
   },
 });

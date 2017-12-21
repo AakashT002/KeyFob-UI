@@ -11,16 +11,16 @@ export const users = createReducer(initialUsersState, {
     return { ...state, requesting: true };
   },
   [ActionTypes.FETCH_USERS_SUCCESS](state, action) {
-    return { ...state, users: action.response, requesting: false };
+    return { ...state, users: action.response };
   },
   [ActionTypes.FETCH_USERS_FAILURE](state) {
     return { ...state, requesting: false };
   },
   [ActionTypes.ADD_BLANK_USER_REQUEST](state) {
-    return { ...state, requesting: true };
+    return { ...state };
   },
   [ActionTypes.ADD_BLANK_USER_SUCCESS](state, action) {
-    return { ...state, users: action.response, requesting: false };
+    return { ...state, users: action.response };
   },
   [ActionTypes.ADD_BLANK_USER_FAILURE](state) {
     return { ...state, requesting: false };
@@ -32,6 +32,9 @@ export const users = createReducer(initialUsersState, {
     return { ...state, userRoles: action.response, requesting: false };
   },
   [ActionTypes.LOAD_USER_ROLE_FAILURE](state) {
+    return { ...state, requesting: false };
+  },
+  [ActionTypes.STOP_USER_SPINNER](state) {
     return { ...state, requesting: false };
   },
 });

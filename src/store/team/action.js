@@ -147,3 +147,7 @@ export const unAssignTeamDomain = (realm, id, clientId) => ({
     }
   },
 });
+
+export function stopTeamSpinner() {
+  return { type: ActionTypes.STOP_TEAM_SPINNER };
+}

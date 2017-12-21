@@ -63,3 +63,7 @@ export const loadUserRoles = (domainName, userId) => ({
     }
   },
 });
+
+export function stopUserSpinner() {
+  return { type: ActionTypes.STOP_USER_SPINNER };
+}
