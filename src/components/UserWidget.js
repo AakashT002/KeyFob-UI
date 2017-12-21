@@ -119,6 +119,7 @@ const UserWidget = ({
           />
           <TextField
             id="email"
+            required
             placeholder="email"
             value={user.email}
             className="md-cell md-cell--bottom login-form__input half-fields"

@@ -70,7 +70,7 @@ const Domain = ({
               onChange={value => handleChange(index, value)}
               helpText={
                 (clients ? clients.length : 0) +
-                ' clients \u2022 ' +
+                ' applications \u2022 ' +
                 (roles ? roles.length : 0) +
                 ' roles \u2022 ' +
                 (users ? users.length : 0) +

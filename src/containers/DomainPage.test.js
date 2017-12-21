@@ -41,12 +41,12 @@ describe('Component: DomainPage', () => {
     expect(wrapper.find('.DomainPage__button-next').exists()).toBe(true);
   });
 
-  it('renders the CLIENTS tab', () => {
+  it('renders the APPLICATIONS tab', () => {
     const wrapper = shallow(
       <DomainPage.WrappedComponent dispatch={dispatchStub} />
     );
     expect(wrapper.find('.DomainPage__clients-tab').prop('label')).toBe(
-      'CLIENTS'
+      'APPLICATIONS'
     );
     expect(wrapper.find('.DomainPage__clients-tab').exists()).toBe(true);
   });

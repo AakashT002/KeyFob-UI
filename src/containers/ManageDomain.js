@@ -336,7 +336,7 @@ export class ManageDomain extends Component {
       /* eslint-enable no-unused-expressions */
 
       domainPreview.content = content;
-      domainPreview.header = `Clients (${domain.clients.length})`;
+      domainPreview.header = `Applications (${domain.clients.length})`;
     }
 
     return domainPreview;
@@ -385,17 +385,19 @@ export class ManageDomain extends Component {
     if (domainList && domainList.length > 0) {
       return (
         <div className="ManageDomainPage">
-          <h1 className="ManageDomainPage__domain-name">Manage Domains</h1>
+          <h1 className="ManageDomainPage__domain-name">Manage Projects</h1>
           <Card id="manageDomain" className="card-block-centered">
             <div className="ManageDomainPage__domain-numbers">
               <h3 className="ManageDomain__domain-text">
-                {domains.length} DOMAINS
+                {domains.length} PROJECTS
               </h3>
               <Button
                 floating
-                className="fa fa-plus ManageDomain__plus-icon"
+                className="fa fa-2x ManageDomain__plus-icon"
                 onClick={() => this.addNewDomain()}
-              />
+              >
+                add
+              </Button>
             </div>
             <DataTable plain className="ManageDomainPage__domain-list">
               <TableBody>
@@ -435,7 +437,7 @@ export class ManageDomain extends Component {
             height="250px"
             width="350px"
             visible={this.state.deleteModalVisible}
-            title="Delete Domain"
+            title="Delete Project"
             onHide={() => {
               this.setState({ deleteModalVisible: false });
             }}
@@ -500,15 +502,17 @@ export class ManageDomain extends Component {
     } else if (!requesting) {
       return (
         <div className="ManageDomainPage">
-          <h1 className="ManageDomainPage__domain-name">Manage Domains</h1>
+          <h1 className="ManageDomainPage__domain-name">Manage Projects</h1>
           <Card className="card-block-centered">
             <div className="ManageDomainPage__domain-numbers">
-              <h3 className="ManageDomain__domain-text">0 DOMAINS</h3>
+              <h3 className="ManageDomain__domain-text">0 PROJECTS</h3>
               <Button
                 floating
-                className="fa fa-plus ManageDomain__plus-icon"
+                className="fa fa-2x ManageDomain__plus-icon"
                 onClick={() => this.addNewDomain()}
-              />
+              >
+                add
+              </Button>
               <h1 className="ManageDomainPage__no-domain">
                 Looks like there are no domains here{' '}
               </h1>
@@ -519,10 +523,10 @@ export class ManageDomain extends Component {
     } else {
       return (
         <div className="ManageDomainPage">
-          <h1 className="ManageDomainPage__domain-name">Manage Domains</h1>
+          <h1 className="ManageDomainPage__domain-name">Manage Projects</h1>
           <Card className="card-block-centered">
             <div className="ManageDomainPage__domain-numbers">
-              <h3 className="ManageDomain__domain-text">0 DOMAINS</h3>
+              <h3 className="ManageDomain__domain-text">0 PROJECTS</h3>
               <Button floating className="fa fa-plus ManageDomain__plus-icon" />
             </div>
             <div className="ManageDomain__spinner-div">

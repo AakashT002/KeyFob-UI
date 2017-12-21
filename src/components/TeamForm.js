@@ -59,7 +59,7 @@ const TeamForm = ({
 
   const domainList = () => {
     return domains.map((domain, i) => {
-      return (
+      return domain.id && domain.id.length > 0 ? (
         <Checkbox
           name={domain.clientId}
           id={i}
@@ -70,7 +70,7 @@ const TeamForm = ({
             handleDomainChange(value, domain.clientId, domain.id, index)}
           checked={!!mappedDomains && domain.clientId in mappedDomains}
         />
-      );
+      ) : null;
     });
   };
 
@@ -79,28 +79,29 @@ const TeamForm = ({
       <div className="TeamForm__forms-section">
         <section className="TeamForm__team-section">
           <div className="teams-fields">
-          <CardActions className="TeamForm__team--detail" id="TeamForm_div">
-            <TextField
-              id="team"
-              required
-              className="md-cell  TeamForm__team-name"
-              placeholder="New Team Name"
-              value={team.name}
-              onChange={value => handleTeamChange(value, index)}
-              ref={team.id === undefined ? inputRef : null}
-            />
-            <SelectField
-              id="domain-dropdown"
-              label={
-                Object.keys(team.mappedDomains).length === 0
-                  ? 'Assign Domain(s)'
-                  : Object.keys(team.mappedDomains).length + ' Domains'
-              }
-              required
-              className="md-cell TeamForm__select"
-              menuItems={domainList()}
-            />
-          </CardActions>
+            <CardActions className="TeamForm__team--detail" id="TeamForm_div">
+              <TextField
+                id="team"
+                required
+                className="md-cell  TeamForm__team-name"
+                placeholder="New Team Name"
+                value={team.name}
+                onChange={value => handleTeamChange(value, index)}
+                ref={team.id === undefined ? inputRef : null}
+              />
+              {Object.keys(domains).length > 0 ? (
+                <SelectField
+                  id="domain-dropdown"
+                  label={
+                    Object.keys(team.mappedDomains).length === 0
+                      ? 'Assign Projects'
+                      : Object.keys(team.mappedDomains).length + ' Projects'
+                  }
+                  className="md-cell TeamForm__select"
+                  menuItems={domainList()}
+                />
+              ) : null}
+            </CardActions>
           </div>
           <CardActions className="TeamForm__bottom-section">
             {showAsSaved === true && renderMessageForTeam()}

@@ -59,7 +59,7 @@ const ClientForm = ({
           <CardActions className="ClientForm__client--details">
             <TextField
               id="clientId"
-              label="Client Name"
+              label="Application Name"
               required
               value={client.clientId}
               className="md-cell md-cell--bottom ClientForm__client-name"
@@ -78,7 +78,7 @@ const ClientForm = ({
             />
             <SelectField
               id="description"
-              label="Client Type"
+              label="Application Type"
               required
               className="md-cell ClientForm__select"
               value={client.description}

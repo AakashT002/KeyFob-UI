@@ -175,6 +175,18 @@ export const addUser = createReducer(initialUsersState, {
       UserFeedbackMessage: action.error.message,
     };
   },
+
+  [ActionTypes.SET_TEMP_PASSWORD_REQUEST](state) {
+    return { ...state, requesting: true };
+  },
+
+  [ActionTypes.SET_TEMP_PASSWORD_SUCCESS](state) {
+    return { ...state, requesting: false };
+  },
+
+  [ActionTypes.SET_TEMP_PASSWORD_FAILURE](state) {
+    return { ...state, requesting: false };
+  },
 });
 
 export default addUser;

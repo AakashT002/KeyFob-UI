@@ -1,6 +1,21 @@
 import * as ActionTypes from '../actionTypes';
 import User from '../../services/User';
 
+export const setUserPasswordAsTemporary = (realm, userObj) => ({
+  types: [
+    ActionTypes.SET_TEMP_PASSWORD_REQUEST,
+    ActionTypes.SET_TEMP_PASSWORD_SUCCESS,
+    ActionTypes.SET_TEMP_PASSWORD_FAILURE,
+  ],
+  callAPI: async () => {
+    try {
+      return await User.setTempPassword(realm, userObj);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+});
+
 export const handleUserCreation = (realm, userObj) => ({
   types: [
     ActionTypes.CREATE_USER_REQUEST,

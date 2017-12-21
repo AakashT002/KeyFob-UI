@@ -1,9 +1,8 @@
 @import './variables';
 
 .ManageDomainPage {
-  min-height: 598px;
-  height: -webkit-fill-available !important;
-  height: 1000px;
+  min-height: 598x;
+  height: 598px;
   padding-top: 100px;
   padding-bottom: 8px;
   font-family: Muli;
@@ -37,15 +36,18 @@
     }
 
     .ManageDomain__plus-icon {
+      left: 700px;
+      bottom: 42px;
       color: $white;
       background-color: $lighter-pink;
-      position: relative;
-      bottom: 40px;
-      left: 666px;
       height: 56px;
       width: 56px;
+      
+      & > i {
+        font-size: 50px;
+        margin: -10px 0 0 -10px;
+      }
     }
-    
   }
 
   .ManageDomainPage__domain-list {
