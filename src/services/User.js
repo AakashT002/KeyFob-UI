@@ -1,7 +1,6 @@
 class User {
   static async add(realm, userObj) {
-    const API_URL = `${process.env
-      .REACT_APP_AUTH_URL}/admin/realms/${realm}/users`;
+    const API_URL = `${process.env.REACT_APP_AUTH_URL}/admin/realms/${realm}/users`;
     const token = sessionStorage.kctoken;
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -23,8 +22,7 @@ class User {
   }
 
   static async assignRoles(realm, userId, roles) {
-    const API_URL = `${process.env
-      .REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
+    const API_URL = `${process.env.REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
     const token = sessionStorage.kctoken;
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -43,8 +41,7 @@ class User {
 
   static async delete(currentdomainName, id) {
     const token = sessionStorage.kctoken;
-    const API_URL = `${process.env
-      .REACT_APP_AUTH_URL}/admin/realms/${currentdomainName}/users/${id}`;
+    const API_URL = `${process.env.REACT_APP_AUTH_URL}/admin/realms/${currentdomainName}/users/${id}`;
     const response = await fetch(API_URL, {
       method: 'DELETE',
       headers: {
@@ -60,8 +57,7 @@ class User {
   }
 
   static async handleUserValidation(userName, realmName) {
-    const API_URL = `${process.env
-      .REACT_APP_AUTH_URL}/admin/realms/${realmName}/users`;
+    const API_URL = `${process.env.REACT_APP_AUTH_URL}/admin/realms/${realmName}/users`;
     const token = sessionStorage.kctoken;
     const response = await fetch(API_URL, {
       method: 'GET',
@@ -83,8 +79,7 @@ class User {
   }
 
   static async getRoles() {
-    const API_URL = `${process.env.REACT_APP_AUTH_URL}/realms/${process.env
-      .REACT_APP_AUTH_REALM}/protocol/openid-connect/userinfo`;
+    const API_URL = `${process.env.REACT_APP_AUTH_URL}/realms/${process.env.REACT_APP_AUTH_REALM}/protocol/openid-connect/userinfo`;
     const token = sessionStorage.kctoken;
     const response = await fetch(API_URL, {
       method: 'GET',
@@ -97,8 +92,9 @@ class User {
       const data = await response.json();
       var roleId = data['sub'];
       const API_URL_role =
-        `${process.env.REACT_APP_AUTH_URL}/admin/realms/${process.env
-          .REACT_APP_AUTH_REALM}/users/` +
+        `${process.env.REACT_APP_AUTH_URL}/admin/realms/${
+          process.env.REACT_APP_AUTH_REALM
+        }/users/` +
         roleId +
         '/role-mappings';
       const token_role = sessionStorage.kctoken;
@@ -131,8 +127,7 @@ class User {
   }
 
   static async updateUser(realm, userObj, id) {
-    const API_URL = `${process.env
-      .REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${id}`;
+    const API_URL = `${process.env.REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${id}`;
     const token = sessionStorage.kctoken;
     const response = await fetch(API_URL, {
       method: 'PUT',
@@ -152,8 +147,7 @@ class User {
   }
 
   static async handleEmailValidation(email, realmName) {
-    const API_URL = `${process.env
-      .REACT_APP_AUTH_URL}/admin/realms/${realmName}/users`;
+    const API_URL = `${process.env.REACT_APP_AUTH_URL}/admin/realms/${realmName}/users`;
     const token = sessionStorage.kctoken;
     const response = await fetch(API_URL, {
       method: 'GET',
@@ -176,8 +170,7 @@ class User {
   }
 
   static async unAssignRoles(realm, userId, roleObj) {
-    const API_URL = `${process.env
-      .REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
+    const API_URL = `${process.env.REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
     const token = sessionStorage.kctoken;
     const response = await fetch(API_URL, {
       method: 'DELETE',
@@ -197,10 +190,7 @@ class User {
   static async assignTeams(realm, userId, teams) {
     var response = '';
     for (var i = 0; i < teams.length; i++) {
-      const API_URL = `${process.env
-        .REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/groups/${teams[
-        i
-      ].id}`;
+      const API_URL = `${process.env.REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/groups/${teams[i].id}`;
       const token = sessionStorage.kctoken;
       response = await fetch(API_URL, {
         method: 'PUT',
@@ -221,10 +211,7 @@ class User {
   static async unAssignTeams(realm, userId, teams) {
     var response = '';
     for (var i = 0; i < teams.length; i++) {
-      const API_URL = `${process.env
-        .REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/groups/${teams[
-        i
-      ].id}`;
+      const API_URL = `${process.env.REACT_APP_AUTH_URL}/admin/realms/${realm}/users/${userId}/groups/${teams[i].id}`;
       const token = sessionStorage.kctoken;
       response = await fetch(API_URL, {
         method: 'DELETE',

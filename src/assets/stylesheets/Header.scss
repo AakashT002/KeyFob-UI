@@ -13,7 +13,7 @@
 
 .Header__username-avatar {
   margin-left: -109px;
-  margin-top: 18px;
+  margin-top: 16px;
 
   .md-avatar--grey {
      background : $blue-grey;
@@ -21,7 +21,7 @@
 }
 
 .Header__username {
-  margin: -30px 0 0 -65px;
+  margin: -32px 0 0 -65px;
   word-wrap: break-word;
   width: 80px;
   position: absolute;
@@ -32,7 +32,6 @@
 .Header__sign-out {
   margin: -45px 0 0 105px;
   padding-left: 5px;
-  position: fixed;
   margin-top: -50px;
 }
 
@@ -84,13 +83,18 @@
 }
 
 .Header__title {
-  margin-top: -29%;
-  margin-left: -10px;
+  margin-top: -40px;
+  margin-right: -2px;
 }
 
 .Header_home {
   color: $white !important;
   margin-left: -510px;
+  margin-top: -15px !important;
+}
+
+.home-button {
+  margin-top: -20px;
 }
 
 .Header_home-text {

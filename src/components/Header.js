@@ -19,23 +19,25 @@ class Header extends Component {
     const username = this.props.userName;
     sessionStorage.setItem('userRoles', this.props.userRoles);
     return (
-      <div>
-        <div className="Header_username-img">
-          <div className="Header__username-avatar">
-            <Avatar key={username} suffix="grey">
-              {username && username.length > 0
-                ? username.charAt(0).toUpperCase()
-                : '?'}
-            </Avatar>
-          </div>
-          <div className="Header__username">
-            <label>{username}</label>
-          </div>
-          <div className="Header__sign-out">
-            <Button flat className="Header__sign-out-button" onClick={this.logout}>
-              Logout&gt;
-            </Button>
-          </div>
+      <div className="Header_username-img">
+        <div className="Header__username-avatar">
+          <Avatar key={username} suffix="grey">
+            {username && username.length > 0
+              ? username.charAt(0).toUpperCase()
+              : '?'}
+          </Avatar>
+        </div>
+        <div className="Header__username">
+          <label>{username}</label>
+        </div>
+        <div className="Header__sign-out">
+          <Button
+            flat
+            className="Header__sign-out-button"
+            onClick={this.logout}
+          >
+            Logout&gt;
+          </Button>
         </div>
       </div>
     );
@@ -49,10 +51,17 @@ class Header extends Component {
   renderTitle() {
     return (
       <div className="Header__info">
-        <Button flat primary className="Header_home" onClick={this.handleClick}>
-          <img src={Home_logo} className="Header__home-logo" alt="logo" />
-          <h4 className="Header_home-text">Home</h4>
-        </Button>
+        <div className="home-button">
+          <Button
+            flat
+            primary
+            className="Header_home"
+            onClick={this.handleClick}
+          >
+            <img src={Home_logo} className="Header__home-logo" alt="logo" />
+            <h4 className="Header_home-text">Home</h4>
+          </Button>
+        </div>
         <div className="Header__title">
           <span className="Header__title-key">
             Key

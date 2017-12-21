@@ -27,7 +27,8 @@
 }
 
 .DomainPage {
-  max-height: 598px;
+  height: -webkit-fill-available !important;
+  height: 1000px;
   padding-top: 65px;
   padding-bottom: 8px;
   font-family: Muli;
@@ -73,8 +74,7 @@
   
   .DomainPage__plus-icon {
     margin-top: 7px;
-    margin-left: -65px;
-    position: relative;
+    margin-left: -25px;
     left: 1030px;
     bottom: 440px;
     color: $white;
@@ -161,13 +161,13 @@
   }
 
   .DomainPage__message-green {
-   color: $light-green;
-   margin: 8px;
+    color: $light-green;
+    margin: 8px;
   }
 
   .DomainPage__message-red {
-   color: $indianred;
-   margin: 8px;
+    color: $indianred;
+    margin: 8px;
   }
 
   .DomainPage__icon {
@@ -191,9 +191,9 @@
 
   .DomainPage__navigate {
     margin-top: -10px;
-   }
+  }
 
-   .DomainPage__roles--modal-delete {
+  .DomainPage__roles--modal-delete {
     font-family: Muli;
     font-size: 16px;
     border-radius: 5px;
@@ -221,17 +221,17 @@
   }
 
   .DomainPage__roles--delete-label-yes {
-     font-weight: 600;
+    font-weight: 600;
   }
 
   .DomainPage__roles--delete-label-no {
-     font-weight: 600;
+    font-weight: 600;
   }
 
   .deleteModal-modal {
-     border-radius: 5px;
-     height: 250px;
-     width: 350px;
+    border-radius: 5px;
+    height: 250px;
+    width: 350px;
   }  
 
   .DomainPage__users-msg {

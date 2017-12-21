@@ -2,7 +2,8 @@
 
 .ManageDomainPage {
   min-height: 598px;
-  max-height: 598px;
+  height: -webkit-fill-available !important;
+  height: 1000px;
   padding-top: 100px;
   padding-bottom: 8px;
   font-family: Muli;
@@ -15,14 +16,14 @@
     min-height: 470px;
   }
 
- .ManageDomainPage__domain-name {
+.ManageDomainPage__domain-name {
     color: $white;
     text-align: center;
     margin-top: -70px;
     
   }
 
- .ManageDomainPage__domain-numbers {
+.ManageDomainPage__domain-numbers {
     background-color: $blue-grey;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
@@ -54,7 +55,7 @@
     overflow-y: auto;
 }
 
- .ManageDomainPage__background {
+.ManageDomainPage__background {
     height: 598px;
     overflow-y: hidden;
   }
@@ -73,7 +74,7 @@
     top: 200%;
   }
 
- .fa {
+.fa {
     display: inline-block;
     font: normal normal normal 30px/1 FontAwesome;
     text-rendering: auto;

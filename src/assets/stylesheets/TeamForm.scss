@@ -30,10 +30,6 @@
 	  background-color: $white;
   }
 
-  .TeamForm__team-section {
-    height: 135px;
-  }
-
   .TeamForm__team--detail {
     margin-top: -40px;
     margin-bottom: 70px;
@@ -112,4 +108,8 @@
   .TeamForm__saved-icon {
     font-size: 12px;
   }
-} 
+}
+
+#domain-dropdown-toggle {
+  margin-top: 19px;
+}

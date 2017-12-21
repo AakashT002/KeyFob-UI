@@ -78,6 +78,7 @@ const TeamForm = ({
     <div className="TeamForm">
       <div className="TeamForm__forms-section">
         <section className="TeamForm__team-section">
+          <div className="teams-fields">
           <CardActions className="TeamForm__team--detail" id="TeamForm_div">
             <TextField
               id="team"
@@ -100,6 +101,7 @@ const TeamForm = ({
               menuItems={domainList()}
             />
           </CardActions>
+          </div>
           <CardActions className="TeamForm__bottom-section">
             {showAsSaved === true && renderMessageForTeam()}
             <Button

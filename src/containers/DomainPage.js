@@ -606,7 +606,7 @@ class DomainPage extends Component {
         {teams.length > 0 ? (
           teams.map((team, i) => (
             <TeamForm
-              key={team.id}
+              key={team.name}
               index={i}
               team={team}
               handleTeamChange={this.handleTeamChange}
@@ -619,7 +619,8 @@ class DomainPage extends Component {
               confirmTeamDelete={this.handleDelete}
               mappedDomains={team.mappedDomains}
               handleDomainChange={(value, domainName, domainId, userIndex) =>
-                this.handleDomainChange(value, domainName, domainId, userIndex)}
+                this.handleDomainChange(value, domainName, domainId, userIndex)
+              }
               domains={this.state.clients}
               inputRef={el => (this.teamElement = el)}
             />
@@ -647,7 +648,8 @@ class DomainPage extends Component {
               index={i}
               client={client}
               handleFieldChange={(name, value) =>
-                this.handleFieldChange(name, value, i)}
+                this.handleFieldChange(name, value, i)
+              }
               handleSave={this.onClientSave.bind(this)}
               validateClientForm={this.validateClientForm.bind(this)}
               isClientSaved={this.state.clients[i].isClientSaved}
@@ -719,7 +721,8 @@ class DomainPage extends Component {
               index={i}
               user={user}
               handleUserFieldChange={(name, value) =>
-                this.handleUserFieldChange(name, value, i)}
+                this.handleUserFieldChange(name, value, i)
+              }
               removeUser={i => this.removeUser(i)}
               validateUserForm={this.validateUserForm.bind(this)}
               saveUser={() => this.onUserSave(i)}
@@ -729,7 +732,8 @@ class DomainPage extends Component {
               isErrorForUser={this.props.isErrorForUser}
               UserFeedbackMessage={this.props.UserFeedbackMessage}
               handleItemChange={(itemChecked, itemName, itemId, userIndex) =>
-                this.handleItemChange(itemChecked, itemName, itemId, userIndex)}
+                this.handleItemChange(itemChecked, itemName, itemId, userIndex)
+              }
               confirmUserDelete={this.handleDelete}
               inputRef={el => (this.userElement = el)}
               isMasterDomain={this.isMasterDomain()}

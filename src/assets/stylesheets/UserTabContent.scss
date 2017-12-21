@@ -114,7 +114,7 @@
 .UserWidget__save {
   color: $light-pink !important;
   font-weight: bold;
-  margin-left: -60px;
+  margin-left: -10px;
 
   &:disabled {
     color: $grey-text !important;
@@ -123,6 +123,7 @@
 
 .UserWidget__remove {
   color: $light-pink !important;
+  margin-left: -22px;   
   font-weight: bold;
 }
 
